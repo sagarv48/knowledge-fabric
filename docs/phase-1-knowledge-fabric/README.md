@@ -163,3 +163,4 @@ Additional guides:
 - `docs/phase-1-knowledge-fabric/local-setup.md`
 - `docs/phase-1-knowledge-fabric/mcp-usage.md`
 - `docs/phase-1-knowledge-fabric/retrieval-evaluation.md`
+- `docs/phase-1-knowledge-fabric/real-adoption-guide.md`
