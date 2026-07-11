@@ -1,0 +1,30 @@
+docs/docs-setup.md
+  h_a5776ec8e90725 1-36
+docs/phase-2-intent-fabric/README.md
+  h_a5776ec8e90725 1-76
+docs/repo-boundaries.md
+  h_a5776ec8e90725 1-30
+docs/phase-2-intent-fabric/AIPromptForImplementation.md
+  h_a5776ec8e90725 1-66
+docs/phase-2-intent-fabric/docs-setup.md
+  h_a5776ec8e90725 1-35
+docs/AIPromptForImplementation.md
+  h_a5776ec8e90725 1-64
+docs/prompts/MASTER_Setup_All_Phases.md
+  h_a5776ec8e90725 1-32
+README.md
+  h_a5776ec8e90725 1-61
+docs/README.md
+  h_a5776ec8e90725 1-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "61da3c688dacb2bff8e7ee1dc982b5f86df49eb8",
+  "prompts": {},
+  "humans": {
+    "h_a5776ec8e90725": {
+      "author": "kshev <VinayKumar.KsheeraSagar@in.pega.com>"
+    }
+  }
+}
