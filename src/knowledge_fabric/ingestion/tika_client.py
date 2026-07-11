@@ -1,0 +1,37 @@
+"""Apache Tika client for binary extraction."""
+
+from __future__ import annotations
+
+import mimetypes
+from pathlib import Path
+
+import requests
+
+
+class TikaClient:
+    """Minimal client for text extraction via Apache Tika."""
+
+    def __init__(self, endpoint: str, timeout_seconds: int = 30) -> None:
+        self._endpoint = endpoint.rstrip("/")
+        self._timeout_seconds = timeout_seconds
+
+    def extract_text(self, file_path: Path) -> str:
+        """Extract plain text from binary documents using Tika."""
+        if not file_path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        content_type, _ = mimetypes.guess_type(file_path.name)
+        headers = {
+            "Accept": "text/plain",
+            "Content-Type": content_type or "application/octet-stream",
+        }
+        with file_path.open("rb") as source:
+            response = requests.put(
+                f"{self._endpoint}/tika",
+                data=source,
+                headers=headers,
+                timeout=self._timeout_seconds,
+            )
+
+        response.raise_for_status()
+        return response.text

@@ -1,0 +1,10 @@
+queries:
+  - id: q1
+    text: "chunking strategy for markdown headings"
+    relevant_chunk_ids: [101, 103]
+  - id: q2
+    text: "vector retrieval with pgvector"
+    relevant_chunk_ids: [202]
+  - id: q3
+    text: "evidence package response model"
+    relevant_chunk_ids: [301, 302]
