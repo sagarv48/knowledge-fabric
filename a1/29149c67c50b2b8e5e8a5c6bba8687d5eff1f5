@@ -1,0 +1,57 @@
+src/knowledge_fabric/mcp/__init__.py
+  s_1357f4f95d0379::t_6bae3c7ff7b33d 1
+src/knowledge_fabric/chunking/__init__.py
+  s_1357f4f95d0379::t_a7e81db8448ef7 1
+src/knowledge_fabric/ingestion/__init__.py
+  s_1357f4f95d0379::t_c6cf61b68c4562 1
+src/knowledge_fabric/fusion/__init__.py
+  s_1357f4f95d0379::t_f2786b95ae084e 1
+config/settings.yaml
+  s_1357f4f95d0379::t_2fa88cc09ea15b 1-26
+src/knowledge_fabric/embeddings/__init__.py
+  s_1357f4f95d0379::t_896590b7777215 1
+docker-compose.yml
+  s_1357f4f95d0379::t_c7c7349ca71b85 8
+  s_1357f4f95d0379::t_a227ec9e6de2a5 1-7,9-27
+src/knowledge_fabric/evaluation/__init__.py
+  s_1357f4f95d0379::t_424fc2f58bf4f5 1
+pyproject.toml
+  s_1357f4f95d0379::t_3fe51eeca29d55 1-13
+  s_1357f4f95d0379::t_646a8616559f54 19-20
+  s_1357f4f95d0379::t_b645edb5264b8f 16
+  s_1357f4f95d0379::t_12cd97f563baa9 14-15,17
+  s_1357f4f95d0379::t_673acad3e64a76 18
+src/knowledge_fabric/retrieval/__init__.py
+  s_1357f4f95d0379::t_ac1ad2f454beb0 1
+src/knowledge_fabric/evidence/__init__.py
+  s_1357f4f95d0379::t_fd00d36c9f1b3f 1
+src/knowledge_fabric/db/__init__.py
+  s_1357f4f95d0379::t_bd867f69062f85 1
+db/schema/002_core_tables.sql
+  s_1357f4f95d0379::t_fcafc74aae3dc8 1-49
+src/knowledge_fabric/__init__.py
+  s_1357f4f95d0379::t_e9d658f438fcef 1
+db/schema/001_extensions.sql
+  s_1357f4f95d0379::t_821c24937cdcca 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "a129149c67c50b2b8e5e8a5c6bba8687d5eff1f5",
+  "prompts": {},
+  "humans": {
+    "h_a5776ec8e90725": {
+      "author": "kshev <VinayKumar.KsheeraSagar@in.pega.com>"
+    }
+  },
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": null
+    }
+  }
+}
