@@ -1,0 +1,130 @@
+src/knowledge_fabric/mcp/__init__.py
+  s_1357f4f95d0379::t_6bae3c7ff7b33d 1
+  s_1357f4f95d0379::t_a931970f78e5aa 2-5
+src/knowledge_fabric/chunking/__init__.py
+  s_1357f4f95d0379::t_a7e81db8448ef7 1
+  s_1357f4f95d0379::t_53aa72e008b9f8 2-5
+src/knowledge_fabric/ingestion/__init__.py
+  s_1357f4f95d0379::t_c6cf61b68c4562 1
+  s_1357f4f95d0379::t_1459be1b00e4a4 2-13
+src/knowledge_fabric/fusion/__init__.py
+  s_1357f4f95d0379::t_f2786b95ae084e 1
+  s_1357f4f95d0379::t_f6d4f8ba821416 2-5
+config/settings.yaml
+  s_1357f4f95d0379::t_2fa88cc09ea15b 1-26
+src/knowledge_fabric/embeddings/__init__.py
+  s_1357f4f95d0379::t_896590b7777215 1
+  s_1357f4f95d0379::t_f35ffe228e2385 2-5
+docker-compose.yml
+  s_1357f4f95d0379::t_c7c7349ca71b85 8
+  s_1357f4f95d0379::t_a227ec9e6de2a5 1-7,9-27
+src/knowledge_fabric/evaluation/__init__.py
+  s_1357f4f95d0379::t_424fc2f58bf4f5 1
+  s_1357f4f95d0379::t_1482d75b50622f 2-23
+pyproject.toml
+  s_1357f4f95d0379::t_3fe51eeca29d55 1-13
+  s_1357f4f95d0379::t_646a8616559f54 25-26
+  s_1357f4f95d0379::t_b645edb5264b8f 22
+  s_1357f4f95d0379::t_12cd97f563baa9 21,23
+  s_1357f4f95d0379::t_673acad3e64a76 24
+  s_1357f4f95d0379::t_2ca724bbaf630c 14-20
+src/knowledge_fabric/retrieval/__init__.py
+  s_1357f4f95d0379::t_ac1ad2f454beb0 1
+  s_1357f4f95d0379::t_8273891f927be7 6
+  s_1357f4f95d0379::t_812e3cd2c5344d 2-5
+src/knowledge_fabric/evidence/__init__.py
+  s_1357f4f95d0379::t_fd00d36c9f1b3f 1
+  s_1357f4f95d0379::t_1c01a1acb29694 2-5
+src/knowledge_fabric/db/__init__.py
+  s_1357f4f95d0379::t_bd867f69062f85 1
+  s_1357f4f95d0379::t_ca37d2d586c06b 2-5
+db/schema/002_core_tables.sql
+  s_1357f4f95d0379::t_fcafc74aae3dc8 1-49
+src/knowledge_fabric/__init__.py
+  s_1357f4f95d0379::t_e9d658f438fcef 1
+db/schema/001_extensions.sql
+  s_1357f4f95d0379::t_821c24937cdcca 1-2
+src/knowledge_fabric/ingestion/models.py
+  s_1357f4f95d0379::t_9cfd925af5ae82 1-40
+src/knowledge_fabric/evaluation/runner.py
+  s_1357f4f95d0379::t_e1d2b229863f1d 1-123
+tests/test_evidence.py
+  s_1357f4f95d0379::t_5992c053de644c 1-30
+src/knowledge_fabric/chunking/service.py
+  s_1357f4f95d0379::t_62f8230abeb754 1-110
+tests/test_evaluation_runner.py
+  s_1357f4f95d0379::t_8365548c98db3c 1-56
+src/knowledge_fabric/retrieval/postgres.py
+  s_1357f4f95d0379::t_313a32949a41a3 74-116
+  s_1357f4f95d0379::t_05f5e0cd45e1d7 1-73,117-152
+tests/test_retrieval_postgres.py
+  s_1357f4f95d0379::t_eafc96eb5a69c9 1-74
+src/knowledge_fabric/retrieval/pipeline.py
+  s_1357f4f95d0379::t_f11115367700b6 11,13
+  s_1357f4f95d0379::t_0d4d862ebcf45e 1-10,12,14-134
+src/knowledge_fabric/ingestion/service.py
+  s_1357f4f95d0379::t_ef4e9a2ce70573 1-87
+docs/phase-1-knowledge-fabric/mcp-usage.md
+  s_1357f4f95d0379::t_e67e487c6f5210 1-20
+src/knowledge_fabric/mcp/tools.py
+  s_1357f4f95d0379::t_97287012c35d86 7-8
+  s_1357f4f95d0379::t_e162b6a96d4606 1-6,9-37
+tests/test_embeddings.py
+  s_1357f4f95d0379::t_d1601432922b58 1-17
+src/knowledge_fabric/embeddings/providers.py
+  s_1357f4f95d0379::t_4a1ef20b98804c 1-40
+docs/phase-1-knowledge-fabric/retrieval-evaluation.md
+  s_1357f4f95d0379::t_a3b37ca1456350 1-32
+tests/test_retrieval_pipeline.py
+  s_1357f4f95d0379::t_a686b7a90c8cbb 1-3,6-79
+  s_1357f4f95d0379::t_9d2551e9dd6ff5 4-5
+src/knowledge_fabric/evaluation/queries.yaml
+  s_1357f4f95d0379::t_719a9a1a5f4383 1-10
+src/knowledge_fabric/ingestion/tika_client.py
+  s_1357f4f95d0379::t_a0789b4bd5beda 1-37
+src/knowledge_fabric/retrieval/models.py
+  s_1357f4f95d0379::t_4b0ae81f0653c1 1-19
+src/knowledge_fabric/evidence/models.py
+  s_1357f4f95d0379::t_624a15a7e43635 1-61
+tests/test_chunking.py
+  s_1357f4f95d0379::t_d6d1516d940b58 1-53
+src/knowledge_fabric/db/audit.py
+  s_1357f4f95d0379::t_3de90fdffac60a 1-53
+tests/test_fusion.py
+  s_1357f4f95d0379::t_500a8a30c7bd73 1-26
+src/knowledge_fabric/fusion/rrf.py
+  s_1357f4f95d0379::t_a40f1e49e4af2d 1-55
+tests/test_mcp_tools.py
+  s_1357f4f95d0379::t_275675c8999c99 1-45
+docs/phase-1-knowledge-fabric/local-setup.md
+  s_1357f4f95d0379::t_d8f4ac0fb8c3db 1-27
+tests/test_ingestion.py
+  s_1357f4f95d0379::t_0382eb48a9897c 46-71,87
+  s_1357f4f95d0379::t_4ca35e996e0e31 1-45,72-86,88-99
+docs/phase-1-knowledge-fabric/README.md
+  s_1357f4f95d0379::t_aa06162ce98c60 122-159
+  s_1357f4f95d0379::t_13415837317861 160-165
+examples/mcp_tool_bootstrap.py
+  s_1357f4f95d0379::t_6572279f747776 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "4ef3e67ee81a0f0da4e68cca98472c96505daac1",
+  "prompts": {},
+  "humans": {
+    "h_a5776ec8e90725": {
+      "author": "kshev <VinayKumar.KsheeraSagar@in.pega.com>"
+    }
+  },
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": null
+    }
+  }
+}
