@@ -9,7 +9,7 @@ Goal:
 Build a vendor-neutral intent planning and approval framework that consumes evidence packages from Knowledge Fabric and produces structured, reviewable plans.
 
 Hard constraints:
-- Do not add Acme-specific integration.
+- Do not add product-specific integration.
 - Do not execute real actions.
 - Do not request enterprise credentials.
 - Do not implement runtime connectors.
@@ -46,7 +46,7 @@ Acceptance criteria:
 - The plan can be validated by policy rules.
 - The system can generate an approval package.
 - Execution is simulated only.
-- No Acme-specific or vendor-specific runtime code exists.
+- No product-specific or vendor-specific runtime code exists.
 ```
 ```
 

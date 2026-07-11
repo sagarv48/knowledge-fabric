@@ -18,7 +18,7 @@ This repository is Phase 1: Knowledge Fabric.
 
 - Workflow execution
 - Product-specific runtime integrations
-- Acme MCP
+- Product-specific MCP adapters
 - Case creation
 - Approval workflows
 - Production credentials
@@ -27,4 +27,4 @@ This repository is Phase 1: Knowledge Fabric.
 ## Related future repositories
 
 - intent-fabric: intent planning and approval framework
-- knowledge-fabric-Acme: private Acme / enterprise integration adapters
+- knowledge-fabric-enterprise-adapters: private enterprise integration adapters
