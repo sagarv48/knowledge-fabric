@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: knowledge-fabric-postgres
+    environment:
+      POSTGRES_DB: knowledge_fabric
+      POSTGRES_USER: knowledge_fabric
+      POSTGRES_PASSWORD: ""
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schema:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knowledge_fabric -d knowledge_fabric"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  tika:
+    image: apache/tika:2.9.2.1
+    container_name: knowledge-fabric-tika
+    ports:
+      - "9998:9998"
+
+volumes:
+  postgres_data:
