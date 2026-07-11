@@ -1,0 +1,21 @@
+docs/phase-1-knowledge-fabric/README.md
+  s_1357f4f95d0379::t_23ac7ae85b50fe 166
+docs/phase-1-knowledge-fabric/real-adoption-guide.md
+  s_1357f4f95d0379::t_22fa7bec4265e9 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "1851d4b819180331cf51e844d8fa33d05b4c28c1",
+  "prompts": {},
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": "VinayKumar KsheeraSagar <sagarv.kumar48@gmail.com>"
+    }
+  }
+}
