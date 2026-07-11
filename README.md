@@ -1,61 +1,72 @@
-# Knowledge Fabric, Intent Fabric, and Enterprise Integration
+# Knowledge Fabric
 
-This documentation package separates three related but independent initiatives:
+Knowledge Fabric is an MCP-native evidence retrieval platform for open-source use. It ingests source material, builds lexical and vector indexes, performs hybrid retrieval, and returns structured evidence packages for AI assistants.
 
-1. **Phase 1: Knowledge Fabric**  
-   Open-source, vendor-neutral retrieval platform. It ingests documents, chunks them, indexes them for lexical/vector search, performs hybrid retrieval, and returns evidence packages through MCP.
+## Project Overview
 
-2. **Phase 2: Intent Fabric**  
-   Open-source or separately governed planning layer. It converts user intent and evidence into structured plans, action contracts, approvals, and simulated execution. It does not include vendor-specific runtime integrations.
+Knowledge Fabric provides vendor-neutral retrieval primitives that improve answer quality by grounding responses in retrieved evidence.
 
-3. **Phase 3: Enterprise / Acme Integration**  
-   Private integration layer. It connects Knowledge Fabric and Intent Fabric to Acme-specific sources, AKF content, Acme docs, Acme MCP, runtime deployment, and enterprise authentication.
-
-## Recommended repository strategy
-
-Use separate repositories:
+## Architecture
 
 ```text
-knowledge-fabric              # public/open-source retrieval platform
-intent-fabric                 # public/open-source planning and approval framework, optional separate project
-knowledge-fabric-Acme         # private enterprise/Acme-specific adapters and deployment
+User Query
+    ↓
+Knowledge Fabric
+    ↓
+Evidence Package
+    ↓
+AI Assistant
 ```
 
-Avoid Git submodules unless you have a strict versioning reason. For most development, separate repos with package dependencies are cleaner.
-
-## Dependency direction
+Core retrieval pipeline:
 
 ```text
-knowledge-fabric
-      ↓
-intent-fabric
-      ↓
-enterprise-integration-adapters
+ingestion -> chunking -> embeddings -> lexical retrieval + vector retrieval -> hybrid fusion -> evidence packaging -> MCP retrieval tools
 ```
 
-Knowledge Fabric must not depend on Intent Fabric or Acme.
-Intent Fabric may consume Knowledge Fabric evidence packages.
-Acme integration may consume both.
+## Features
 
-## What must remain vendor-neutral
-
-- Ingestion interfaces
-- Chunking
+- Document ingestion and parsing
+- Chunking and metadata extraction
 - Embedding provider abstraction
-- Lexical search
-- Vector search
-- Hybrid retrieval
-- RRF fusion
+- Lexical retrieval
+- Vector retrieval
+- Hybrid retrieval with rank fusion
 - Evidence package contract
-- MCP retrieval tools
-- Evaluation framework
+- MCP-native retrieval endpoints
+- Retrieval evaluation framework
 
-## What must remain private / enterprise-specific
+## Roadmap
 
-- Acme internal documents
-- AKF internal docs
-- Acme MCP runtime details
-- Acme URLs, OAuth credentials, case types, rule names if not public
-- Internal architecture diagrams
-- Internal security reviews
-- Customer or production data
+1. Stabilize ingestion and chunking interfaces.
+2. Expand retrieval evaluation benchmarks and datasets.
+3. Add optional pluggable reranking components.
+4. Improve deployment examples for local and containerized development.
+
+## Getting Started
+
+```bash
+git clone <repository-url>
+cd knowledge-fabric
+```
+
+Read the project guides in `docs/`:
+
+- `docs/README.md`
+- `docs/repo-boundaries.md`
+- `docs/phase-1-knowledge-fabric/README.md`
+
+## Contributing
+
+See `CONTRIBUTING.md` for contribution workflow, coding expectations, and review process.
+
+## License
+
+This project is licensed under the Apache License 2.0. See `LICENSE`.
+
+## Non-goals
+
+- Runtime workflow execution
+- Product-specific integrations
+- Customer-specific adapters and deployment details
+- Credential management for external enterprise systems

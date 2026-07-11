@@ -42,7 +42,7 @@ Implement in this order:
 Acceptance criteria:
 - `retrieve_evidence` returns JSON evidence packages.
 - Hybrid retrieval combines lexical and vector results.
-- No product-specific terms appear in source code or docs.
+- No product-specific terms appear in source code or docs except in examples clearly marked as external/private adapter examples.
 - No workflow execution functions exist in this repo.
 ```
 ```

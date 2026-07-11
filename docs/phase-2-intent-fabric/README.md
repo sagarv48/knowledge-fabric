@@ -38,7 +38,7 @@ In scope:
 
 Out of scope:
 
-- Direct Acme integration
+- Direct product-specific runtime integration
 - Jira/ADO/ServiceNow runtime integration
 - Production credentials
 - Real workflow execution

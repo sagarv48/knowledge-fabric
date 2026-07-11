@@ -26,7 +26,7 @@ Generate these files:
 6. docs/knowledge-fabric-integration.md
 
 Requirements:
-- No Acme-specific content.
+- No product-specific content.
 - No real workflow execution.
 - Explain that Intent Fabric consumes Knowledge Fabric evidence packages.
 - Explain that runtime connectors belong to Phase 3.
