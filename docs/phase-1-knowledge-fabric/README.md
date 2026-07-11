@@ -119,3 +119,47 @@ Knowledge Fabric MVP is complete when:
 - MCP tool `retrieve_evidence` returns evidence packages.
 - Retrieval evaluation runs.
 - Negative tests abstain correctly.
+
+## Current implementation status
+
+Implemented:
+
+- Ingestion for markdown, txt, html, pdf, docx, pptx
+- Apache Tika-based binary extraction
+- Heading-aware chunking with fallback windowing
+- Mock embedding provider interface
+- PostgreSQL lexical retrieval and pgvector retrieval
+- Hybrid retrieval with reciprocal rank fusion
+- Evidence package contract
+- MCP tool surface:
+  - `retrieve_evidence`
+  - `get_document`
+  - `explain_retrieval`
+- Retrieval audit logging
+- Evaluation runner and sample query set
+
+## Adoption quickstart
+
+```bash
+docker compose up -d
+PYTHONPATH=src python3 -m pytest tests
+```
+
+Core package layout:
+
+```text
+src/knowledge_fabric/ingestion
+src/knowledge_fabric/chunking
+src/knowledge_fabric/embeddings
+src/knowledge_fabric/retrieval
+src/knowledge_fabric/fusion
+src/knowledge_fabric/evidence
+src/knowledge_fabric/mcp
+src/knowledge_fabric/evaluation
+```
+
+Additional guides:
+
+- `docs/phase-1-knowledge-fabric/local-setup.md`
+- `docs/phase-1-knowledge-fabric/mcp-usage.md`
+- `docs/phase-1-knowledge-fabric/retrieval-evaluation.md`

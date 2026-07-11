@@ -1,0 +1,26 @@
+app:
+  name: knowledge-fabric
+  environment: local
+  log_level: INFO
+
+database:
+  host: localhost
+  port: 5432
+  name: knowledge_fabric
+  user: knowledge_fabric
+  password: ""
+
+tika:
+  endpoint: http://localhost:9998/tika
+  request_timeout_seconds: 30
+
+embeddings:
+  provider: mock
+  dimension: 1536
+  batch_size: 64
+
+retrieval:
+  default_top_k: 10
+  lexical_weight: 0.5
+  vector_weight: 0.5
+  rrf_k: 60
