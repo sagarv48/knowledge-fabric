@@ -1,0 +1,42 @@
+pyproject.toml
+  s_1357f4f95d0379::t_5518c6058bcfaf 24-27
+tests/test_ingestion_cli.py
+  s_1357f4f95d0379::t_a3c9895984c13b 1-92
+src/knowledge_fabric/ingestion/cli.py
+  s_1357f4f95d0379::t_95f969150a6ed8 1-94
+docs/phase-1-knowledge-fabric/real-adoption-guide.md
+  s_1357f4f95d0379::t_3626f0140749c6 35,57,59-63,65-66,132
+docs/phase-1-knowledge-fabric/local-setup.md
+  s_1357f4f95d0379::t_34e91528eae5bb 17,23-29
+src/knowledge_fabric/db/repository.py
+  s_1357f4f95d0379::t_f9d01c908d72c5 1-98
+README.md
+  s_1357f4f95d0379::t_e6ebc8ba95400e 3,5,7-18,24,26,28,32,35-47,50,52-58,60,62-64,66,69,72-80,83-88,92-98,101-103,107,111-112,114
+  s_1357f4f95d0379::t_2c4c9e700f0035 89
+docs/deployment-runbook.md
+  s_1357f4f95d0379::t_dc8dbab5fcabfd 1-75
+src/knowledge_fabric/db/__init__.py
+  s_1357f4f95d0379::t_5439f7d94c804d 5,7
+docs/phase-1-knowledge-fabric/README.md
+  s_1357f4f95d0379::t_3d6c7e35f79da8 167
+.github/workflows/ci.yml
+  s_1357f4f95d0379::t_5c071f9122fbe9 1-31
+tests/test_db_repository.py
+  s_1357f4f95d0379::t_5118cec2d982d7 1-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "9c7b3d1a9edb09ccddeaa3d35e1bcc5dca24245f",
+  "prompts": {},
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": "VinayKumar KsheeraSagar <sagarv.kumar48@gmail.com>"
+    }
+  }
+}
