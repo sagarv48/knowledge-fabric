@@ -6,6 +6,18 @@ Knowledge Fabric exposes three Phase 1 MCP-style tools:
 2. `get_document(document_id=None, source_uri=None)`
 3. `explain_retrieval(query_text, top_k=10, source_type=None)`
 
+## Run MCP server
+
+```bash
+python3 -m knowledge_fabric.mcp
+```
+
+Server startup loads:
+
+- `config/settings.yaml`
+- PostgreSQL connection settings
+- retrieval pipeline and audit logger
+
 ## Tool wiring
 
 Use:

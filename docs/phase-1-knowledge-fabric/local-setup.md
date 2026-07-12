@@ -17,6 +17,12 @@ Services:
 PYTHONPATH=src python3 -m pytest tests
 ```
 
+## Run MCP server
+
+```bash
+PYTHONPATH=src python3 -m knowledge_fabric.mcp
+```
+
 ## Run evaluation (sample)
 
 Use the query set in:
