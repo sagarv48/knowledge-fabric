@@ -164,3 +164,4 @@ Additional guides:
 - `docs/phase-1-knowledge-fabric/mcp-usage.md`
 - `docs/phase-1-knowledge-fabric/retrieval-evaluation.md`
 - `docs/phase-1-knowledge-fabric/real-adoption-guide.md`
+- `docs/deployment-runbook.md`

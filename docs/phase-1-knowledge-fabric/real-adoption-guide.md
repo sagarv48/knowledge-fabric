@@ -32,7 +32,7 @@ Schema files under `db/schema/` are applied automatically on first startup.
 ## 4. Run baseline tests
 
 ```bash
-PYTHONPATH=src python3 -m pytest tests
+python3 -m pytest
 ```
 
 ## 5. Ingest source documents
@@ -54,12 +54,16 @@ print(document.source_uri, len(chunks))
 
 ## 6. Persist documents/chunks
 
-Current repository provides schema and retrieval logic. Persisting ingested documents/chunks can be done by inserting:
+Use the persistent ingestion CLI:
 
-- `documents` rows for ingested documents
-- `chunks` rows for chunked content
+```bash
+knowledge-fabric-ingest --path sources --recursive --embed
+```
 
-Tables are defined in `db/schema/002_core_tables.sql`.
+This command ingests supported files, chunks content, optionally creates mock embeddings, and writes data to:
+
+- `documents`
+- `chunks`
 
 ## 7. Wire retrieval components
 
@@ -125,3 +129,4 @@ Metrics:
 - **No retrieval hits**: verify `documents`/`chunks` tables contain records.
 - **Binary extraction empty**: verify Tika is reachable at `http://localhost:9998/tika`.
 - **Vector search errors**: verify `vector` extension is installed and embeddings are stored in `chunks.embedding`.
+- **CLI command not found**: run `python3 -m pip install -e ".[dev]"` to install project scripts.

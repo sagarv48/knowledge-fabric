@@ -14,13 +14,19 @@ Services:
 ## Run tests
 
 ```bash
-PYTHONPATH=src python3 -m pytest tests
+python3 -m pytest
 ```
 
 ## Run MCP server
 
 ```bash
-PYTHONPATH=src python3 -m knowledge_fabric.mcp
+knowledge-fabric-mcp
+```
+
+## Persist ingested data
+
+```bash
+knowledge-fabric-ingest --path sources --recursive --embed
 ```
 
 ## Run evaluation (sample)

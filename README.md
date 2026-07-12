@@ -1,72 +1,114 @@
 # Knowledge Fabric
 
-Knowledge Fabric is an MCP-native evidence retrieval platform for open-source use. It ingests source material, builds lexical and vector indexes, performs hybrid retrieval, and returns structured evidence packages for AI assistants.
+Knowledge Fabric is a vendor-neutral evidence retrieval platform.
 
-## Project Overview
+In plain terms: it helps an assistant find the right context before generating a response. Instead of jumping straight to “an answer,” it returns a structured **evidence package** that downstream assistants can use for grounded output.
 
-Knowledge Fabric provides vendor-neutral retrieval primitives that improve answer quality by grounding responses in retrieved evidence.
+## Why this project exists
+
+Many assistant failures come from missing or weak context, not from poor generation quality.  
+Knowledge Fabric focuses on that retrieval layer so teams can improve relevance, traceability, and trust.
+
+## What it does (Phase 1)
+
+- Ingests source content (markdown, text, html, pdf, docx, pptx)
+- Chunks and normalizes content for retrieval
+- Supports lexical search, vector search, and hybrid fusion
+- Returns evidence packages through MCP tools
+- Tracks retrieval telemetry and evaluation metrics
 
 ## Architecture
 
 ```text
 User Query
-    ↓
+    ->
 Knowledge Fabric
-    ↓
+    ->
 Evidence Package
-    ↓
+    ->
 AI Assistant
 ```
 
-Core retrieval pipeline:
+Retrieval pipeline:
 
 ```text
-ingestion -> chunking -> embeddings -> lexical retrieval + vector retrieval -> hybrid fusion -> evidence packaging -> MCP retrieval tools
+Sources
+  ->
+Ingestion
+  ->
+Chunking
+  ->
+Embeddings
+  ->
+Lexical + Vector Retrieval
+  ->
+Hybrid Fusion (RRF)
+  ->
+Evidence Package
 ```
 
-## Features
-
-- Document ingestion and parsing
-- Chunking and metadata extraction
-- Embedding provider abstraction
-- Lexical retrieval
-- Vector retrieval
-- Hybrid retrieval with rank fusion
-- Evidence package contract
-- MCP-native retrieval endpoints
-- Retrieval evaluation framework
-
-## Roadmap
-
-1. Stabilize ingestion and chunking interfaces.
-2. Expand retrieval evaluation benchmarks and datasets.
-3. Add optional pluggable reranking components.
-4. Improve deployment examples for local and containerized development.
-
-## Getting Started
+## Quick start
 
 ```bash
 git clone <repository-url>
 cd knowledge-fabric
+python3 -m pip install -e ".[dev]"
+docker compose up -d
+python3 -m pytest
 ```
 
-Read the project guides in `docs/`:
+Run persistent ingestion:
+
+```bash
+knowledge-fabric-ingest --path sources --recursive --embed
+```
+
+Run MCP server:
+
+```bash
+knowledge-fabric-mcp
+```
+
+## MCP tools
+
+- `retrieve_evidence`
+- `get_document`
+- `explain_retrieval`
+
+These tools return retrieval outputs and metadata, not final prose answers.
+
+## Documentation map
 
 - `docs/README.md`
-- `docs/repo-boundaries.md`
+- `docs/architecture.md`
+- `docs/local-setup.md`
+- `docs/evidence-package-contract.md`
+- `docs/retrieval-evaluation.md`
+- `docs/model-provider-strategy.md`
+- `docs/security-and-data-boundaries.md`
+- `docs/deployment-runbook.md`
 - `docs/phase-1-knowledge-fabric/README.md`
+
+## Current roadmap
+
+1. Expand evaluation datasets and benchmarks.
+2. Add optional reranking extension points.
+3. Improve ingestion operational ergonomics for larger corpora.
+4. Continue hardening local-to-production deployment guidance.
 
 ## Contributing
 
-See `CONTRIBUTING.md` for contribution workflow, coding expectations, and review process.
+Contributions are welcome. If you’re fixing a bug or adding retrieval capabilities, please include tests and docs updates in the same change whenever possible.
+
+See `CONTRIBUTING.md` for full workflow details.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See `LICENSE`.
+Apache License 2.0. See `LICENSE`.
 
 ## Non-goals
 
-- Runtime workflow execution
+- Workflow execution
+- Approval orchestration
 - Product-specific integrations
-- Customer-specific adapters and deployment details
-- Credential management for external enterprise systems
+- Customer-specific deployment internals

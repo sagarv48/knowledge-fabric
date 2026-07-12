@@ -21,6 +21,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0"]
 
+[project.scripts]
+knowledge-fabric-mcp = "knowledge_fabric.mcp.server:run_mcp_server"
+knowledge-fabric-ingest = "knowledge_fabric.ingestion.cli:main"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
