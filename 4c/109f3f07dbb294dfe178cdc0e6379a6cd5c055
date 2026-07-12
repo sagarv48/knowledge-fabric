@@ -1,0 +1,29 @@
+docs/evidence-package-contract.md
+  s_1357f4f95d0379::t_857ac491867c61 1-64
+docs/security-and-data-boundaries.md
+  s_1357f4f95d0379::t_450240810b4f9a 1-50
+docs/architecture.md
+  s_1357f4f95d0379::t_ebb7fb53ec0043 1-72
+docs/retrieval-evaluation.md
+  s_1357f4f95d0379::t_720b5c9ce9ecae 1-53
+docs/local-setup.md
+  s_1357f4f95d0379::t_ed4aebd3a6b577 1-55
+docs/model-provider-strategy.md
+  s_1357f4f95d0379::t_188663cb202df4 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "4c109f3f07dbb294dfe178cdc0e6379a6cd5c055",
+  "prompts": {},
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": "VinayKumar KsheeraSagar <sagarv.kumar48@gmail.com>"
+    }
+  }
+}
