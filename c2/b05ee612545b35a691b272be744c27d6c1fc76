@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_1357f4f95d0379::t_e8b84e64791479 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "c2b05ee612545b35a691b272be744c27d6c1fc76",
+  "prompts": {},
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": "VinayKumar KsheeraSagar <sagarv.kumar48@gmail.com>"
+    }
+  }
+}
