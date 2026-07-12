@@ -6,7 +6,7 @@ from typing import Any
 
 from knowledge_fabric.config import Settings, load_settings
 from knowledge_fabric.db import AuditLogger, create_postgres_connection_factory
-from knowledge_fabric.embeddings import MockEmbeddingProvider
+from knowledge_fabric.embeddings import MockEmbeddingProvider, build_embedding_provider
 from knowledge_fabric.mcp.tools import KnowledgeFabricMCPTools
 from knowledge_fabric.retrieval.pipeline import RetrievalPipeline
 from knowledge_fabric.retrieval.postgres import PostgresRetrievalStore
@@ -16,7 +16,10 @@ def build_tools_from_settings(settings: Settings) -> KnowledgeFabricMCPTools:
     """Build MCP tools with configured retrieval dependencies."""
     connection_factory = create_postgres_connection_factory(settings.database)
     retrieval_store = PostgresRetrievalStore(connection_factory=connection_factory)
-    embedding_provider = MockEmbeddingProvider(_dimension=settings.embeddings.dimension)
+    embedding_provider = build_embedding_provider(
+        provider_name=settings.embeddings.provider,
+        dimension=settings.embeddings.dimension,
+    )
     audit_logger = AuditLogger(connection_factory=connection_factory)
     pipeline = RetrievalPipeline(
         retrieval_store=retrieval_store,
