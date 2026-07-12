@@ -1,0 +1,41 @@
+src/knowledge_fabric/db/__init__.py
+  s_1357f4f95d0379::t_25d7483e68eae7 4,6
+src/knowledge_fabric/config.py
+  s_1357f4f95d0379::t_8fbe20879cbc3e 1-73
+src/knowledge_fabric/mcp/server.py
+  s_1357f4f95d0379::t_d86c3185d93958 1-70
+pyproject.toml
+  s_1357f4f95d0379::t_85f76efc34c85e 17-18
+docs/phase-1-knowledge-fabric/local-setup.md
+  s_1357f4f95d0379::t_d7c7b467f82560 20-25
+tests/test_config.py
+  s_1357f4f95d0379::t_749302b6b27c52 1-39
+tests/test_mcp_server.py
+  s_1357f4f95d0379::t_adc5d7f3e11548 1-46
+src/knowledge_fabric/mcp/__init__.py
+  s_1357f4f95d0379::t_add7c3f9928b01 3,6
+src/knowledge_fabric/mcp/__main__.py
+  s_1357f4f95d0379::t_993ab77db68a2b 1-7
+docs/phase-1-knowledge-fabric/mcp-usage.md
+  s_1357f4f95d0379::t_b91f4b575ed62f 9-20
+tests/conftest.py
+  s_1357f4f95d0379::t_f64f5f95402dce 1-11
+src/knowledge_fabric/db/connection.py
+  s_1357f4f95d0379::t_8b362907617062 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "af7152375753feec622a3db0c3766d63e21e84ad",
+  "prompts": {},
+  "sessions": {
+    "s_1357f4f95d0379": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "87cfee0a-2b6a-49fd-81b4-c5ba37c59eb2",
+        "model": "auto"
+      },
+      "human_author": "VinayKumar KsheeraSagar <sagarv.kumar48@gmail.com>"
+    }
+  }
+}
