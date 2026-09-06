@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import pytest
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 from benchmarks.evaluate_retrieval import dcg_at_k, mrr_at_k, ndcg_at_k, recall_at_k
 
