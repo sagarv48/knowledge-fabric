@@ -73,7 +73,7 @@ class CrossEncoderReranker:
     _model: object = field(default=None, init=False, repr=False, compare=False)
 
     @classmethod
-    def from_env(cls) -> "CrossEncoderReranker":
+    def from_env(cls) -> CrossEncoderReranker:
         model_name = os.environ.get(
             "CROSS_ENCODER_MODEL", "cross-encoder/ms-marco-MiniLM-L-6-v2"
         )
@@ -118,10 +118,10 @@ class CohereReranker:
     _model: str
 
     @classmethod
-    def from_env(cls) -> "CohereReranker":
+    def from_env(cls) -> CohereReranker:
         api_key = os.environ.get("COHERE_API_KEY", "")
         if not api_key:
-            raise EnvironmentError("COHERE_API_KEY is required for CohereReranker")
+            raise OSError("COHERE_API_KEY is required for CohereReranker")
         model = os.environ.get("COHERE_RERANK_MODEL", "rerank-english-v3.0")
         return cls(_api_key=api_key, _model=model)
 

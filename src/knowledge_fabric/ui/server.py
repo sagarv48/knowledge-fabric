@@ -217,7 +217,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
         action = raw_action.lower()
         if action.startswith("db_") or "drop" in action:
             self._send_json({"action": action, "decision": "deny", "reason": "Destructive operations are strictly prohibited."})
-        elif action.startswith("ticket_") or action.startswith("notification_") or "create" in action:
+        elif action.startswith(("ticket_", "notification_")) or "create" in action:
             self._send_json({"action": action, "decision": "requires_approval", "reason": "External actions require human review."})
         else:
             self._send_json({"action": action, "decision": "allow", "reason": "Read-only inspection pre-approved."})
@@ -226,9 +226,9 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
 def run_ui_server(host: str = "127.0.0.1", port: int = 8080) -> None:
     server_address = (host, port)
     httpd = ThreadingHTTPServer(server_address, DashboardRequestHandler)
-    print(f"\n\U0001f310 Knowledge Fabric & Intent Fabric Admin Console")
+    print("\n\U0001f310 Knowledge Fabric & Intent Fabric Admin Console")
     print(f"   Dashboard running at: http://{host}:{port}/")
-    print(f"   Press Ctrl+C to stop.\n")
+    print("   Press Ctrl+C to stop.\n")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

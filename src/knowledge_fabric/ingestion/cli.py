@@ -77,9 +77,10 @@ def main(argv: list[str] | None = None) -> int:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Ingest and persist source files for Knowledge Fabric.")
-    parser.add_argument("--path", required=True, help="Source file or directory path.")
+    parser.add_argument("--path", "--source-path", dest="path", required=True, help="Source file or directory path.")
     parser.add_argument("--settings", default="config/settings.yaml", help="Path to settings.yaml.")
-    parser.add_argument("--tenant", default="default", help="Tenant ID for multi-tenant isolation.")
+    parser.add_argument("--tenant", "--collection", dest="tenant", default="default", help="Tenant ID for multi-tenant isolation.")
+    parser.add_argument("--source-type", dest="source_type", default=None, help="Optional source format hint (e.g. markdown, pdf).")
     parser.add_argument("--recursive", action="store_true", help="Recursively scan directories.")
     parser.add_argument("--embed", action="store_true", help="Compute and store embeddings for chunks using configured provider.")
     parser.add_argument("--max-chunk-chars", type=int, default=1200, help="Maximum chunk size in characters.")

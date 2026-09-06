@@ -13,7 +13,7 @@ from pathlib import Path
 # Add project roots to sys.path so example runs directly without pip install -e
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _KF_ROOT = _SCRIPT_DIR.parents[1] / "src"
-_IF_ROOT = _SCRIPT_DIR.parents[3] / "intent-fabric" / "src"
+_IF_ROOT = _SCRIPT_DIR.parents[2] / "intent-fabric" / "src"
 
 for root in [_KF_ROOT, _IF_ROOT]:
     if root.exists() and str(root) not in sys.path:

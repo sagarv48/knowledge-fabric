@@ -82,7 +82,7 @@ class OllamaEmbeddingProvider:
     _dimension: int
 
     @classmethod
-    def from_env(cls) -> "OllamaEmbeddingProvider":
+    def from_env(cls) -> OllamaEmbeddingProvider:
         model = os.environ.get("OLLAMA_EMBED_MODEL", "nomic-embed-text")
         base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
         # nomic-embed-text = 768d; mxbai-embed-large = 1024d; all-minilm = 384d
@@ -131,10 +131,10 @@ class OpenAIEmbeddingProvider:
     _dimension: int
 
     @classmethod
-    def from_env(cls) -> "OpenAIEmbeddingProvider":
+    def from_env(cls) -> OpenAIEmbeddingProvider:
         api_key = os.environ.get("OPENAI_API_KEY", "")
         if not api_key:
-            raise EnvironmentError("OPENAI_API_KEY environment variable is required")
+            raise OSError("OPENAI_API_KEY environment variable is required")
         model = os.environ.get("OPENAI_EMBED_MODEL", "text-embedding-3-small")
         dim_by_model: dict[str, int] = {
             "text-embedding-3-small": 1536,
@@ -186,10 +186,10 @@ class CohereEmbeddingProvider:
     _input_type: str
 
     @classmethod
-    def from_env(cls) -> "CohereEmbeddingProvider":
+    def from_env(cls) -> CohereEmbeddingProvider:
         api_key = os.environ.get("COHERE_API_KEY", "")
         if not api_key:
-            raise EnvironmentError("COHERE_API_KEY environment variable is required")
+            raise OSError("COHERE_API_KEY environment variable is required")
         model = os.environ.get("COHERE_EMBED_MODEL", "embed-english-v3.0")
         input_type = os.environ.get("COHERE_INPUT_TYPE", "search_document")
         dim_by_model: dict[str, int] = {

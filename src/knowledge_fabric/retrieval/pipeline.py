@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import re
 from dataclasses import dataclass
 from time import perf_counter
 from typing import Any
@@ -11,7 +13,7 @@ from knowledge_fabric.embeddings import EmbeddingProvider
 from knowledge_fabric.evidence.models import EvidencePackage, build_evidence_package
 from knowledge_fabric.fusion import reciprocal_rank_fusion
 from knowledge_fabric.reranking import PassthroughReranker, Reranker
-from knowledge_fabric.retrieval.postgres import PostgresRetrievalStore
+from knowledge_fabric.retrieval.store import RetrievalStore
 
 
 @dataclass(slots=True)
@@ -25,11 +27,6 @@ class RetrievalTrace:
     fused_count: int
     latency_ms: int
 
-
-from knowledge_fabric.retrieval.store import RetrievalStore
-
-import os
-import re
 
 _DEFAULT_MAX_QUERY_LENGTH = int(os.environ.get("KNOWLEDGE_MAX_QUERY_LENGTH", "4000"))
 _DEFAULT_MAX_TOP_K = int(os.environ.get("KNOWLEDGE_MAX_TOP_K", "100"))

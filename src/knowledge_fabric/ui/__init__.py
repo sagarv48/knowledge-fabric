@@ -2,4 +2,4 @@
 
 from knowledge_fabric.ui.server import main, run_ui_server
 
-__all__ = ["run_ui_server", "main"]
+__all__ = ["main", "run_ui_server"]

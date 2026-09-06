@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 from typing import Any
 
 from knowledge_fabric.chunking import DocumentChunkingService
@@ -104,7 +103,7 @@ def main(argv: list[str] | None = None) -> int:
     for res in resources:
         try:
             item = adapter.fetch_resource(res.resource_id)
-        except Exception as exc:
+        except Exception:
             continue
 
         raw_content = str(item.get("content", ""))

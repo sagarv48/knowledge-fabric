@@ -7,8 +7,8 @@ from knowledge_fabric.db.repository import KnowledgeRepository
 
 __all__ = [
     "AuditLogger",
-    "KnowledgeRepository",
-    "create_postgres_connection_factory",
     "DimensionMismatchError",
+    "KnowledgeRepository",
     "check_embedding_dimension",
+    "create_postgres_connection_factory",
 ]
