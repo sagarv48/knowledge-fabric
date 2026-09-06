@@ -115,12 +115,13 @@ def test_reranker_candidate_pool_is_capped() -> None:
         retrieval_store=mock_store,
         embedding_provider=mock_provider,
         reranker=mock_reranker,
+        max_rerank_candidates=50,
     )
 
     pipeline.retrieve_evidence(query_text="test query", top_k=10)
     # Verify the reranker received at most 50 candidate chunks, not all 100
     candidates_passed = mock_reranker.rerank.call_args[0][1]
-    assert len(candidates_passed) <= _MAX_RERANK_CANDIDATES
+    assert len(candidates_passed) <= 50
 
 
 def _make_handler(method: str, path: str, body: dict | None = None) -> DashboardRequestHandler:
