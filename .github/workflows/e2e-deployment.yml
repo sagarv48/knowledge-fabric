@@ -1,0 +1,167 @@
+name: E2E Deployment & Evaluation
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - "deploy/helm/**"
+      - "src/**"
+      - ".github/workflows/e2e-deployment.yml"
+  workflow_dispatch:
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Docker Container & Docker Compose End-to-End Evaluation
+  # ----------------------------------------------------------------------------
+  docker-e2e:
+    name: Docker & Compose E2E Evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build local Docker image
+        run: |
+          docker build -t knowledge-fabric:e2e-test .
+
+      - name: Verify Docker image security & non-root user
+        run: |
+          USER_ID=$(docker run --rm --entrypoint id knowledge-fabric:e2e-test -u)
+          echo "Container runtime UID: $USER_ID"
+          if [ "$USER_ID" != "10001" ]; then
+            echo "FAILED: Container must run as non-root user (UID 10001), got: $USER_ID"
+            exit 1
+          fi
+
+      - name: Start Full Platform via Docker Compose
+        run: |
+          docker compose up -d --build
+          echo "Waiting for services to become healthy..."
+          timeout 60 bash -c 'until docker compose ps | grep -q "healthy"; do sleep 2; done'
+          sleep 5
+          docker compose ps
+
+      - name: Evaluate HTTP Health Endpoint
+        run: |
+          HEALTH_RESP=$(curl -s -f http://localhost:8080/api/health)
+          echo "Health Response: $HEALTH_RESP"
+          echo "$HEALTH_RESP" | grep -q '"status": "ok"' || exit 1
+          echo "$HEALTH_RESP" | grep -q '"version": "0.1.1"' || exit 1
+
+      - name: Evaluate Policy Sandbox & Namespaced Actions
+        run: |
+          # 1. Standard action requiring approval
+          RESP1=$(curl -s -f -X POST http://localhost:8080/api/policies/test \
+            -H "Content-Type: application/json" \
+            -d '{"action": "ticket_create"}')
+          echo "Policy Test 1 (ticket_create): $RESP1"
+          echo "$RESP1" | grep -q '"decision": "requires_approval"' || exit 1
+
+          # 2. Namespaced enterprise action
+          RESP2=$(curl -s -f -X POST http://localhost:8080/api/policies/test \
+            -H "Content-Type: application/json" \
+            -d '{"action": "jira:create_issue"}')
+          echo "Policy Test 2 (jira:create_issue): $RESP2"
+          echo "$RESP2" | grep -q '"decision": "requires_approval"' || exit 1
+
+          # 3. Destructive action prohibited
+          RESP3=$(curl -s -f -X POST http://localhost:8080/api/policies/test \
+            -H "Content-Type: application/json" \
+            -d '{"action": "db_drop_table"}')
+          echo "Policy Test 3 (db_drop_table): $RESP3"
+          echo "$RESP3" | grep -q '"decision": "deny"' || exit 1
+
+      - name: Evaluate Visual Admin Console Static Assets
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "FAILED: Admin UI dashboard returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "Admin UI served successfully (HTTP 200)"
+
+      - name: Tear down Compose
+        if: always()
+        run: docker compose down -v
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Kubernetes & Helm End-to-End Cluster Evaluation
+  # ----------------------------------------------------------------------------
+  helm-k8s-e2e:
+    name: Kubernetes & Helm E2E Evaluation
+    runs-on: ubuntu-latest
+    needs: [docker-e2e]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.14.0"
+
+      - name: Lint Helm Chart
+        run: |
+          helm lint deploy/helm/knowledge-fabric
+
+      - name: Dry-Run Helm Template Rendering
+        run: |
+          echo "=== Testing Default Template (Embedded pgvector) ==="
+          helm template test-poc deploy/helm/knowledge-fabric --set postgresql.enabled=true > /dev/null
+
+          echo "=== Testing External Database Configuration ==="
+          helm template test-prod deploy/helm/knowledge-fabric \
+            --set postgresql.enabled=false \
+            --set postgresql.external.enabled=true \
+            --set postgresql.external.host="rds.internal" \
+            --set postgresql.external.existingSecret="rds-secret" > /dev/null
+
+      - name: Create local Kubernetes Cluster (KinD)
+        run: |
+          kind create cluster --name fabric-test --wait 120s
+          kubectl cluster-info
+
+      - name: Build & Load Docker Image into KinD
+        run: |
+          docker build -t ghcr.io/sagarv48/knowledge-fabric:v0.1.1 .
+          kind load docker-image ghcr.io/sagarv48/knowledge-fabric:v0.1.1 --name fabric-test
+
+      - name: Deploy Knowledge Fabric via Helm
+        run: |
+          helm install fabric deploy/helm/knowledge-fabric \
+            --namespace fabric --create-namespace \
+            --set image.pullPolicy=Never \
+            --set postgresql.persistence.enabled=false \
+            --set resources.requests.cpu=50m \
+            --set resources.requests.memory=128Mi \
+            --set postgresql.resources.requests.cpu=50m \
+            --set postgresql.resources.requests.memory=128Mi \
+            --set tika.resources.requests.cpu=50m \
+            --set tika.resources.requests.memory=128Mi
+
+      - name: Wait for Kubernetes Pods to be Ready
+        run: |
+          echo "Waiting for pods in namespace 'fabric'..."
+          kubectl get pods -n fabric
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=knowledge-fabric -n fabric --timeout=180s
+          kubectl get pods -n fabric -o wide
+
+      - name: Verify Cluster Liveness & Readiness via Port-Forward
+        run: |
+          kubectl port-forward svc/fabric-knowledge-fabric 8080:8080 -n fabric &
+          PF_PID=$!
+          sleep 3
+
+          HEALTH=$(curl -s -f http://localhost:8080/api/health)
+          echo "Cluster API Response: $HEALTH"
+          echo "$HEALTH" | grep -q '"status": "ok"' || exit 1
+
+          kill $PF_PID || true
+
+      - name: Inspect Cluster Logs
+        if: always()
+        run: |
+          kubectl get events -n fabric --sort-by='.metadata.creationTimestamp'
+          kubectl logs -l app.kubernetes.io/name=knowledge-fabric -n fabric --tail=50
