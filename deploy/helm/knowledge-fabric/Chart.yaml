@@ -2,8 +2,8 @@ apiVersion: v2
 name: knowledge-fabric
 description: Production Helm chart for Knowledge Fabric & Intent Fabric evidence retrieval and governance platform
 type: application
-version: 0.1.0
-appVersion: "0.1.0"
+version: 0.1.1
+appVersion: "0.1.1"
 keywords:
   - knowledge-fabric
   - intent-fabric

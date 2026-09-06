@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: ghcr.io/sagarv48/knowledge-fabric:v0.1.0
+    image: ghcr.io/sagarv48/knowledge-fabric:v0.1.1
     container_name: knowledge-fabric-app
     ports:
       - "8080:8080"

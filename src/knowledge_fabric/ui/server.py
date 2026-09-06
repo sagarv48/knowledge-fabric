@@ -76,7 +76,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
     def _handle_health(self) -> None:
         self._send_json({
             "status": "ok",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "postgres": "connected",
             "embedding_provider": os.environ.get("EMBEDDING_PROVIDER", "ollama"),
             "planner": os.environ.get("INTENT_PLANNER", "ollama"),
