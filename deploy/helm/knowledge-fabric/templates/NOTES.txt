@@ -1,0 +1,30 @@
+==============================================================================
+Knowledge Fabric & Intent Fabric Platform has been deployed!
+==============================================================================
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+1. Accessing the Admin Console & REST API:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}{{ (first .paths).path }}
+{{- end }}
+{{- else }}
+   Run port forwarding:
+   kubectl port-forward svc/{{ include "knowledge-fabric.fullname" . }} 8080:{{ .Values.service.port }} --namespace {{ .Release.Namespace }}
+   
+   Then open your browser at:
+   http://localhost:8080/
+{{- end }}
+
+2. Platform Diagnostics:
+   curl -s http://localhost:8080/api/health | jq .
+
+3. Security & Approval Enforcement:
+   Mode: {{ .Values.security.approvalEnforcement }}
+   Strict Action Syntax: {{ .Values.security.strictActionValidation }} (Regex: {{ .Values.security.actionSyntaxRegex }})
+   Database Backend: {{ if .Values.postgresql.external.enabled }}External ({{ .Values.postgresql.external.host }}){{ else }}Embedded pgvector StatefulSet{{ end }}
+
+Thank you for choosing Knowledge Fabric.
+==============================================================================

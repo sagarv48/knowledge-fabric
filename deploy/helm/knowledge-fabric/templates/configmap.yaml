@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "knowledge-fabric.fullname" . }}-config
+  labels:
+    {{- include "knowledge-fabric.labels" . | nindent 4 }}
+data:
+  KF_UI_HOST: "0.0.0.0"
+  KF_UI_PORT: "8080"
+  KF_DB_HOST: {{ include "knowledge-fabric.postgresHost" . | quote }}
+  KF_DB_PORT: {{ include "knowledge-fabric.postgresPort" . | quote }}
+  KF_DB_NAME: {{ include "knowledge-fabric.postgresDatabase" . | quote }}
+  KF_DB_USER: {{ include "knowledge-fabric.postgresUser" . | quote }}
+  {{- if .Values.postgresql.external.enabled }}
+  KF_DB_SSLMODE: {{ .Values.postgresql.external.sslMode | quote }}
+  {{- end }}
+  {{- if .Values.tika.enabled }}
+  TIKA_ENDPOINT: {{ printf "http://%s-tika:9998" (include "knowledge-fabric.fullname" .) | quote }}
+  {{- end }}
+  EMBEDDING_PROVIDER: {{ .Values.ai.embeddingProvider | quote }}
+  RERANKER: {{ .Values.ai.reranker | quote }}
+  FABRIC_APPROVAL_ENFORCEMENT: {{ .Values.security.approvalEnforcement | quote }}
+  KNOWLEDGE_STRICT_TENANT_CHECK: {{ .Values.security.strictTenantCheck | quote }}
+  INTENT_STRICT_ACTION_VALIDATION: {{ .Values.security.strictActionValidation | quote }}
+  INTENT_ACTION_SYNTAX_REGEX: {{ .Values.security.actionSyntaxRegex | quote }}

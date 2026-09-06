@@ -28,6 +28,40 @@ class RetrievalTrace:
 
 from knowledge_fabric.retrieval.store import RetrievalStore
 
+import os
+import re
+
+_DEFAULT_MAX_QUERY_LENGTH = int(os.environ.get("KNOWLEDGE_MAX_QUERY_LENGTH", "4000"))
+_DEFAULT_MAX_TOP_K = int(os.environ.get("KNOWLEDGE_MAX_TOP_K", "100"))
+_DEFAULT_MAX_RERANK_CANDIDATES = int(os.environ.get("KNOWLEDGE_MAX_RERANK_CANDIDATES", "100"))
+
+# Supports standard enterprise formats: alphanumeric, hyphens, underscores, dots, colons, and @ (emails, domains, URNs, UUIDs)
+_TENANT_ID_REGEX = re.compile(r"^[a-zA-Z0-9_.:@-]{1,128}$")
+
+
+def validate_tenant_id(tenant_id: str | None) -> str | None:
+    """Validate that tenant_id adheres to safe enterprise namespace format.
+
+    Supports UUIDs, domain names, emails, and namespaced IDs while preventing
+    SQL injection, path traversal (e.g. '../'), and control character injection.
+    Can be bypassed if KNOWLEDGE_STRICT_TENANT_CHECK=false.
+    """
+    if tenant_id is None:
+        return None
+    cleaned = tenant_id.strip()
+    if not cleaned:
+        return None
+
+    # Allow disabling strict check via environment if custom enterprise naming schemes are used
+    if os.environ.get("KNOWLEDGE_STRICT_TENANT_CHECK", "true").lower() in ("false", "0", "off"):
+        # Still sanitize against null bytes and control chars
+        return "".join(ch for ch in cleaned if ord(ch) >= 32 and ch != "\x7f")[:128]
+
+    if not _TENANT_ID_REGEX.match(cleaned) or ".." in cleaned:
+        raise ValueError(f"Invalid tenant_id format: '{tenant_id!r}'. Must match ^[a-zA-Z0-9_.:@-]{{1,128}}$ with no path traversal.")
+    return cleaned
+
+
 class RetrievalPipeline:
     """Coordinates lexical/vector retrieval, fusion, packaging, and audit logging."""
 
@@ -41,6 +75,9 @@ class RetrievalPipeline:
         rrf_k: int = 60,
         lexical_weight: float = 1.0,
         vector_weight: float = 1.0,
+        max_query_length: int | None = None,
+        max_top_k: int | None = None,
+        max_rerank_candidates: int | None = None,
     ) -> None:
         self._retrieval_store = retrieval_store
         self._embedding_provider = embedding_provider
@@ -49,6 +86,9 @@ class RetrievalPipeline:
         self._rrf_k = rrf_k
         self._lexical_weight = lexical_weight
         self._vector_weight = vector_weight
+        self._max_query_length = max_query_length if max_query_length is not None else _DEFAULT_MAX_QUERY_LENGTH
+        self._max_top_k = max_top_k if max_top_k is not None else _DEFAULT_MAX_TOP_K
+        self._max_rerank_candidates = max_rerank_candidates if max_rerank_candidates is not None else _DEFAULT_MAX_RERANK_CANDIDATES
 
     def retrieve_evidence(
         self,
@@ -77,13 +117,18 @@ class RetrievalPipeline:
         trace_id: str | None = None,
         tenant_id: str | None = None,
     ) -> tuple[EvidencePackage, RetrievalTrace]:
+        # Security hardening: Configurable input bounding against DoS & Injection
+        safe_query = (query_text or "").strip()[:self._max_query_length]
+        safe_top_k = max(1, min(top_k, self._max_top_k))
+        safe_tenant = validate_tenant_id(tenant_id)
+
         start = perf_counter()
         lexical = self._retrieval_store.lexical_search(
-            query_text, top_k=top_k, source_type=source_type, tenant_id=tenant_id
+            safe_query, top_k=safe_top_k, source_type=source_type, tenant_id=safe_tenant
         )
-        vector_query = self._embedding_provider.embed_texts([query_text])[0]
+        vector_query = self._embedding_provider.embed_texts([safe_query])[0]
         vector = self._retrieval_store.vector_search(
-            vector_query, top_k=top_k, source_type=source_type, tenant_id=tenant_id
+            vector_query, top_k=safe_top_k, source_type=source_type, tenant_id=safe_tenant
         )
 
         fused = reciprocal_rank_fusion(
@@ -93,18 +138,19 @@ class RetrievalPipeline:
             lexical_weight=self._lexical_weight,
             vector_weight=self._vector_weight,
         )
-        fused = fused[:top_k]
+        # Cap candidate pool for reranking to protect CPU/GPU from compute explosion
+        candidates_to_rerank = fused[:self._max_rerank_candidates]
         # Apply reranker (no-op if PassthroughReranker)
-        fused = self._reranker.rerank(query_text, fused, top_n=top_k)
-        package = build_evidence_package(query_text, fused)
+        reranked = self._reranker.rerank(safe_query, candidates_to_rerank, top_n=safe_top_k)
+        package = build_evidence_package(safe_query, reranked)
         latency_ms = int((perf_counter() - start) * 1000)
 
         trace = RetrievalTrace(
-            query_text=query_text,
-            top_k=top_k,
+            query_text=safe_query,
+            top_k=safe_top_k,
             lexical_count=len(lexical),
             vector_count=len(vector),
-            fused_count=len(fused),
+            fused_count=len(reranked),
             latency_ms=latency_ms,
         )
 

@@ -67,35 +67,60 @@ flowchart TB
 
 ---
 
-## Quickstart (5 Minutes)
+## Quickstart & Deployment Options
 
-### 1. Clone and Install
+Choose the consumption pathway that fits your architecture:
+
+### ⚡ Pathway 1: Python Developers & MCP Users
+If you are importing the retrieval engine into Python code, custom agents, or running MCP:
+```bash
+# Install core package from PyPI
+pip install knowledge-fabric
+
+# Or install with neural rerankers
+pip install "knowledge-fabric[reranking]"
+
+# Run the MCP server directly via uvx (zero-installation):
+uvx knowledge-fabric-mcp
+```
+
+### 🐳 Pathway 2: Turnkey Evaluation (Docker Compose)
+Spin up the entire multi-tenant stack (PostgreSQL + pgvector, Apache Tika, and Admin UI) in seconds:
+```bash
+# Clone or download docker-compose.prod.yml
+curl -sSL https://raw.githubusercontent.com/sagarv48/knowledge-fabric/main/docker-compose.prod.yml -o docker-compose.yml
+
+# Start full platform with pgvector and Tika
+docker compose up -d
+
+# Access Visual Admin Console at: http://localhost:8080
+```
+
+### ☸️ Pathway 3: Enterprise Kubernetes (Production Helm Chart)
+Deploy a resilient, scalable, multi-tenant cluster deployment on EKS, GKE, AKS, or OpenShift:
+```bash
+# Install via OCI registry
+helm install fabric-stack oci://ghcr.io/sagarv48/charts/knowledge-fabric \
+  --namespace fabric --create-namespace \
+  --set postgresql.enabled=true \
+  --set security.approvalEnforcement=enforce
+
+# Or connect to external AWS RDS / GCP Cloud SQL:
+# helm install fabric-stack oci://ghcr.io/sagarv48/charts/knowledge-fabric \
+#   --namespace fabric --create-namespace \
+#   --set postgresql.enabled=false \
+#   --set postgresql.external.enabled=true \
+#   --set postgresql.external.host=my-rds.amazonaws.com \
+#   --set postgresql.external.existingSecret=my-rds-secret
+```
+
+### 🛠️ Pathway 4: Local Contributor Setup
 ```bash
 git clone https://github.com/sagarv48/knowledge-fabric.git
 cd knowledge-fabric
-
-# Install core package
-python3 -m pip install -e .
-
-# Or install with local reranking and development tools
 python3 -m pip install -e ".[reranking,dev]"
-```
-
-### 2. Start PostgreSQL + pgvector
-```bash
-# Starts Postgres with pgvector and pre-loaded schema migrations (001-004)
 docker compose up -d postgres tika
-```
-
-### 3. Ingest Documents
-```bash
-# Ingest local documents into tenant 'engineering' using local Ollama embeddings
 EMBEDDING_PROVIDER=ollama knowledge-fabric-ingest --path ./docs --recursive --embed --tenant engineering
-```
-
-### 4. Start the MCP Server
-```bash
-# Run the MCP server over stdio for Cursor, Claude Desktop, or custom agents
 knowledge-fabric-mcp
 ```
 

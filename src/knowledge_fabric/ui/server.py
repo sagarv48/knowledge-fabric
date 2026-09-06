@@ -107,14 +107,27 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
         parts = self.path.split("/")
         approval_id = parts[3] if len(parts) > 3 else "unknown"
         body = self._read_body_json()
-        decision = body.get("decision", "Approved")
-        comment = body.get("comment", "")
+        decision = str(body.get("decision", "Approved"))
+        comment = str(body.get("comment", ""))
+        reviewer = str(body.get("reviewer", "admin@corp.com"))
+        
+        import hashlib
+        import hmac
+        from datetime import UTC, datetime
+        timestamp = datetime.now(UTC).isoformat()
+        secret_key = os.environ.get("FABRIC_SIGNING_KEY", "fabric-insecure-dev-hmac-key-change-in-production")
+        canonical = f"{approval_id}|plan_sec_demo|step_01|{decision.strip().lower()}|{reviewer}|{timestamp}"
+        signature = hmac.new(secret_key.encode("utf-8"), canonical.encode("utf-8"), hashlib.sha256).hexdigest()
+
         self._send_json({
             "approval_id": approval_id,
             "decision": decision,
             "status": "resolved",
+            "reviewer": reviewer,
             "comment": comment,
-            "timestamp": "now",
+            "timestamp": timestamp,
+            "signature": signature,
+            "algorithm": "HMAC-SHA256",
         })
 
     def _handle_get_audit(self) -> None:
@@ -138,8 +151,14 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
 
     def _handle_post_retrieval_query(self) -> None:
         body = self._read_body_json()
-        query = body.get("query", "emergency access")
-        tenant_id = body.get("tenant_id", "default")
+        query = str(body.get("query", "emergency access")).strip()[:1000]
+        tenant_id = str(body.get("tenant_id", "default")).strip()
+
+        import re
+        if not re.match(r"^[a-zA-Z0-9_-]{1,64}$", tenant_id):
+            self._send_json({"error": f"Invalid tenant_id '{tenant_id}'. Must match ^[a-zA-Z0-9_-]{{1,64}}$."}, status=HTTPStatus.BAD_REQUEST)
+            return
+
         self._send_json({
             "query": query,
             "tenant_id": tenant_id,
@@ -171,10 +190,21 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
 
     def _handle_post_policy_test(self) -> None:
         body = self._read_body_json()
-        action = body.get("action", "").lower().strip()
+        raw_action = str(body.get("action", "")).strip()
+        import re
+        action_regex = os.getenv("INTENT_ACTION_SYNTAX_REGEX", r"^[a-zA-Z0-9_.:-]{1,128}$")
+        if not re.match(action_regex, raw_action):
+            self._send_json({
+                "action": raw_action,
+                "decision": "deny",
+                "reason": f"Security violation: action '{raw_action}' failed syntax validation. Must match {action_regex}.",
+            })
+            return
+
+        action = raw_action.lower()
         if action.startswith("db_") or "drop" in action:
             self._send_json({"action": action, "decision": "deny", "reason": "Destructive operations are strictly prohibited."})
-        elif action.startswith("ticket_") or action.startswith("notification_"):
+        elif action.startswith("ticket_") or action.startswith("notification_") or "create" in action:
             self._send_json({"action": action, "decision": "requires_approval", "reason": "External actions require human review."})
         else:
             self._send_json({"action": action, "decision": "allow", "reason": "Read-only inspection pre-approved."})
@@ -195,9 +225,11 @@ def run_ui_server(host: str = "127.0.0.1", port: int = 8080) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    default_host = os.getenv("KF_UI_HOST", "127.0.0.1")
+    default_port = int(os.getenv("KF_UI_PORT", "8080"))
     parser = argparse.ArgumentParser(description="Run the Knowledge Fabric & Intent Fabric Admin Dashboard.")
-    parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8080, help="Port number (default: 8080)")
+    parser.add_argument("--host", default=default_host, help=f"Host interface (default: {default_host})")
+    parser.add_argument("--port", type=int, default=default_port, help=f"Port number (default: {default_port})")
     args = parser.parse_args(argv)
     run_ui_server(host=args.host, port=args.port)
     return 0

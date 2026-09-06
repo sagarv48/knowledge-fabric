@@ -1,0 +1,59 @@
+{{- if .Values.tika.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "knowledge-fabric.fullname" . }}-tika
+  labels:
+    {{- include "knowledge-fabric.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tika
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9998
+      targetPort: 9998
+      name: tika
+  selector:
+    {{- include "knowledge-fabric.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: tika
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "knowledge-fabric.fullname" . }}-tika
+  labels:
+    {{- include "knowledge-fabric.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tika
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "knowledge-fabric.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: tika
+  template:
+    metadata:
+      labels:
+        {{- include "knowledge-fabric.labels" . | nindent 8 }}
+        app.kubernetes.io/component: tika
+    spec:
+      containers:
+        - name: tika
+          image: "{{ .Values.tika.image.repository }}:{{ .Values.tika.image.tag }}"
+          imagePullPolicy: {{ .Values.tika.image.pullPolicy }}
+          ports:
+            - containerPort: 9998
+              name: tika
+          resources:
+            {{- toYaml .Values.tika.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /tika
+              port: 9998
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /tika
+              port: 9998
+            initialDelaySeconds: 5
+            periodSeconds: 10
+{{- end }}

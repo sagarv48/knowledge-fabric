@@ -1,0 +1,148 @@
+name: Release & Distribution
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      publish_pypi:
+        description: "Publish Python package to PyPI"
+        type: boolean
+        default: true
+      publish_docker:
+        description: "Build and push container image to GHCR"
+        type: boolean
+        default: true
+      publish_helm:
+        description: "Package and push Helm chart to GHCR OCI"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Build & Publish Python Wheel to PyPI
+  # ----------------------------------------------------------------------------
+  publish-pypi:
+    name: Build & Publish to PyPI
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || inputs.publish_pypi
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: pip install --upgrade build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Validate distribution integrity
+        run: twine check dist/*
+
+      - name: Publish package to PyPI
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Build & Publish Multi-Arch OCI Container to GHCR
+  # ----------------------------------------------------------------------------
+  publish-docker:
+    name: Build & Push Container to GHCR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || inputs.publish_docker
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (multi-platform emulation)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Package & Publish Helm Chart to OCI Registry
+  # ----------------------------------------------------------------------------
+  publish-helm:
+    name: Package & Push Helm Chart
+    runs-on: ubuntu-latest
+    needs: [publish-docker]
+    if: github.event_name == 'push' || inputs.publish_helm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.14.0"
+
+      - name: Lint Helm chart
+        run: helm lint deploy/helm/knowledge-fabric
+
+      - name: Package Helm chart
+        id: package
+        run: |
+          mkdir -p .cr-release-packages
+          # Extract version from tag if present, else fallback to chart version
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -n "$VERSION" ] && [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            helm package deploy/helm/knowledge-fabric --destination .cr-release-packages --version "$VERSION" --app-version "$VERSION"
+          else
+            helm package deploy/helm/knowledge-fabric --destination .cr-release-packages
+          fi
+          CHART_FILE=$(ls .cr-release-packages/*.tgz | head -n 1)
+          echo "chart_file=$CHART_FILE" >> $GITHUB_OUTPUT
+
+      - name: Log in to GHCR with Helm
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Push Helm chart to OCI registry
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          helm push "${{ steps.package.outputs.chart_file }}" "oci://ghcr.io/${OWNER_LOWER}/charts"

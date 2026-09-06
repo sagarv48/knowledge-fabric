@@ -1,0 +1,20 @@
+apiVersion: v2
+name: knowledge-fabric
+description: Production Helm chart for Knowledge Fabric & Intent Fabric evidence retrieval and governance platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - knowledge-fabric
+  - intent-fabric
+  - rag
+  - mcp
+  - pgvector
+  - enterprise-ai
+home: https://github.com/sagarv48/knowledge-fabric
+sources:
+  - https://github.com/sagarv48/knowledge-fabric
+  - https://github.com/sagarv48/intent-fabric
+maintainers:
+  - name: sagarv48
+    email: maintainers@knowledge-fabric.dev
