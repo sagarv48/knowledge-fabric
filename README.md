@@ -11,12 +11,50 @@
 
 <p align="center">
   <a href="https://github.com/sagarv48/knowledge-fabric/actions"><img src="https://img.shields.io/badge/CI-passing-brightgreen.svg" alt="CI Status"></a>
+  <a href="https://github.com/sagarv48/knowledge-fabric/releases"><img src="https://img.shields.io/badge/Release-v0.1.1-blue.svg" alt="Release"></a>
+  <a href="https://ghcr.io/sagarv48/charts/knowledge-fabric"><img src="https://img.shields.io/badge/Helm%20OCI-v0.1.1-0F1689?logo=helm&logoColor=white" alt="Helm Chart"></a>
+  <a href="https://codespaces.new/sagarv48/knowledge-fabric"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg" alt="Python Versions"></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Native%20Server-purple.svg" alt="MCP Native"></a>
   <a href="docker-compose.yml"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg" alt="Docker Ready"></a>
-  <a href="BRANDING.md"><img src="https://img.shields.io/badge/Design%20System-Fabric%20Brand-9B51E0.svg" alt="Brand Guidelines"></a>
 </p>
+
+---
+
+## ⚡ 30-Second Quickstart
+
+### 1. Instant Cloud Sandbox (Zero Local Setup)
+Click to launch a fully configured browser VS Code workspace with PostgreSQL + `pgvector` and Tika running automatically:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sagarv48/knowledge-fabric)
+
+### 2. Connect to Claude Desktop or Cursor (MCP)
+Give Claude Desktop or Cursor private, local long-term memory over your enterprise codebase and documents. Add this to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "knowledge-fabric": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "DATABASE_URL=postgresql://knowledge_fabric:knowledge_fabric@host.docker.internal:5432/knowledge_fabric",
+        "ghcr.io/sagarv48/knowledge-fabric:0.1.1",
+        "knowledge-fabric-mcp"
+      ]
+    }
+  }
+}
+```
+
+### 3. Run Locally with Docker Compose (60 Seconds)
+```bash
+git clone https://github.com/sagarv48/knowledge-fabric.git && cd knowledge-fabric
+docker compose up -d
+
+# Run the interactive hybrid RRF demonstration
+python examples/quickstart_interactive.py
+```
 
 ---
 
