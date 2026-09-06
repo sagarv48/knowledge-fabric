@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import hmac
 import json
 import logging
 import os
+from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -123,10 +126,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
         decision = str(body.get("decision", "Approved"))
         comment = str(body.get("comment", ""))
         reviewer = str(body.get("reviewer", "admin@corp.com"))
-        
-        import hashlib
-        import hmac
-        from datetime import UTC, datetime
+
         timestamp = datetime.now(UTC).isoformat()
         secret_key = os.environ.get("FABRIC_SIGNING_KEY", "fabric-insecure-dev-hmac-key-change-in-production")
         canonical = f"{approval_id}|plan_sec_demo|step_01|{decision.strip().lower()}|{reviewer}|{timestamp}"
