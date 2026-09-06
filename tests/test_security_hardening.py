@@ -13,13 +13,9 @@ import json
 from unittest.mock import MagicMock
 import pytest
 
-from knowledge_fabric.evidence.models import EvidenceChunk
 from knowledge_fabric.retrieval.pipeline import (
     RetrievalPipeline,
     validate_tenant_id,
-    _MAX_QUERY_LENGTH,
-    _MAX_TOP_K,
-    _MAX_RERANK_CANDIDATES,
 )
 from knowledge_fabric.ui.server import DashboardRequestHandler
 

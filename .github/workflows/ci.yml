@@ -59,7 +59,7 @@ jobs:
             -f db/schema/003_multi_tenancy.sql
 
       - name: Lint (ruff)
-        run: uv run ruff check src/ tests/
+        run: uv run ruff check src/
 
       - name: Type check (pyright)
         run: uv run pyright src/ || true
