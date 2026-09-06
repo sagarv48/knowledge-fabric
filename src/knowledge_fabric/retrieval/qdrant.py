@@ -15,7 +15,7 @@ from urllib.request import Request, urlopen
 from knowledge_fabric.retrieval.models import RetrievalHit
 
 
-@dataclass(slots=True)
+@dataclass
 class QdrantRetrievalStore:
     """RetrievalStore implementation querying remote Qdrant collections.
 

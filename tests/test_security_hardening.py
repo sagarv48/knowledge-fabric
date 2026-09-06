@@ -13,6 +13,7 @@ import json
 from unittest.mock import MagicMock
 import pytest
 
+from knowledge_fabric.retrieval.models import RetrievalHit
 from knowledge_fabric.retrieval.pipeline import (
     RetrievalPipeline,
     validate_tenant_id,
@@ -87,16 +88,15 @@ def test_reranker_candidate_pool_is_capped() -> None:
     """Reranker candidate pool must be capped at _MAX_RERANK_CANDIDATES to prevent CPU DoS."""
     # Create 100 dummy chunks
     hundred_hits = [
-        EvidenceChunk(
+        RetrievalHit(
             chunk_id=i,
             document_id=1,
             document_uri=f"doc_{i}",
-            content=f"Chunk content {i}",
             chunk_index=i,
+            chunk_text=f"Chunk content {i}",
             score=0.9,
-            source_type="file",
-            tenant_id="default",
-            metadata={},
+            source="file",
+            metadata={"tenant_id": "default"},
         )
         for i in range(100)
     ]

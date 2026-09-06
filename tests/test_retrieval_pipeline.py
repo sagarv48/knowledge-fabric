@@ -6,7 +6,14 @@ from knowledge_fabric.retrieval.pipeline import RetrievalPipeline
 
 
 class _FakeStore:
-    def lexical_search(self, query_text: str, top_k: int = 10, source_type: str | None = None) -> list[RetrievalHit]:
+    def lexical_search(
+        self,
+        query_text: str,
+        top_k: int = 10,
+        source_type: str | None = None,
+        tenant_id: str | None = None,
+        **kwargs: object,
+    ) -> list[RetrievalHit]:
         return [
             RetrievalHit(
                 chunk_id=1,
@@ -25,6 +32,8 @@ class _FakeStore:
         query_embedding: list[float],
         top_k: int = 10,
         source_type: str | None = None,
+        tenant_id: str | None = None,
+        **kwargs: object,
     ) -> list[RetrievalHit]:
         return [
             RetrievalHit(

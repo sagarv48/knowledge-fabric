@@ -8,6 +8,7 @@ import hmac
 import json
 import logging
 import os
+import re
 from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -203,8 +204,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
 
     def _handle_post_policy_test(self) -> None:
         body = self._read_body_json()
-        raw_action = str(body.get("action", "")).strip()
-        import re
+        raw_action = str(body.get("action", ""))
         action_regex = os.getenv("INTENT_ACTION_SYNTAX_REGEX", r"^[a-zA-Z0-9_.:-]{1,128}$")
         if not re.match(action_regex, raw_action):
             self._send_json({
@@ -214,7 +214,7 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
             })
             return
 
-        action = raw_action.lower()
+        action = raw_action.strip().lower()
         if action.startswith("db_") or "drop" in action:
             self._send_json({"action": action, "decision": "deny", "reason": "Destructive operations are strictly prohibited."})
         elif action.startswith(("ticket_", "notification_")) or "create" in action:

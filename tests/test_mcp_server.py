@@ -23,6 +23,14 @@ class _FakeFastMCP:
 
 class _FakeTools:
     @staticmethod
+    def health_check(**kwargs):
+        return {"status": "ok", "kwargs": kwargs}
+
+    @staticmethod
+    def list_sources(**kwargs):
+        return {"sources": [], "kwargs": kwargs}
+
+    @staticmethod
     def retrieve_evidence(**kwargs):
         return {"ok": True, "kwargs": kwargs}
 
@@ -43,4 +51,10 @@ def test_create_mcp_server_registers_expected_tools(monkeypatch) -> None:
     server = create_mcp_server(_FakeTools())
 
     assert server.name == "knowledge-fabric"
-    assert sorted(server.tool_names) == ["explain_retrieval", "get_document", "retrieve_evidence"]
+    assert sorted(server.tool_names) == [
+        "explain_retrieval",
+        "get_document",
+        "health_check",
+        "list_sources",
+        "retrieve_evidence",
+    ]

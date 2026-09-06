@@ -11,6 +11,8 @@ class _FakePipeline:
         top_k: int = 10,
         source_type: str | None = None,
         trace_id: str | None = None,
+        tenant_id: str | None = None,
+        **kwargs: object,
     ):
         class _Package:
             @staticmethod
@@ -20,7 +22,13 @@ class _FakePipeline:
         return _Package()
 
     @staticmethod
-    def explain_retrieval(query_text: str, top_k: int = 10, source_type: str | None = None) -> dict[str, object]:
+    def explain_retrieval(
+        query_text: str,
+        top_k: int = 10,
+        source_type: str | None = None,
+        tenant_id: str | None = None,
+        **kwargs: object,
+    ) -> dict[str, object]:
         return {"query_text": query_text, "top_k": top_k, "trace": {"fused_count": 1}}
 
 
