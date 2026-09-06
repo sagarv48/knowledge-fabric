@@ -10,6 +10,7 @@ from knowledge_fabric.db.audit import AuditLogger
 from knowledge_fabric.embeddings import EmbeddingProvider
 from knowledge_fabric.evidence.models import EvidencePackage, build_evidence_package
 from knowledge_fabric.fusion import reciprocal_rank_fusion
+from knowledge_fabric.reranking import PassthroughReranker, Reranker
 from knowledge_fabric.retrieval.postgres import PostgresRetrievalStore
 
 
@@ -25,15 +26,18 @@ class RetrievalTrace:
     latency_ms: int
 
 
+from knowledge_fabric.retrieval.store import RetrievalStore
+
 class RetrievalPipeline:
     """Coordinates lexical/vector retrieval, fusion, packaging, and audit logging."""
 
     def __init__(
         self,
         *,
-        retrieval_store: PostgresRetrievalStore,
+        retrieval_store: RetrievalStore,
         embedding_provider: EmbeddingProvider,
         audit_logger: AuditLogger | None = None,
+        reranker: Reranker | None = None,
         rrf_k: int = 60,
         lexical_weight: float = 1.0,
         vector_weight: float = 1.0,
@@ -41,6 +45,7 @@ class RetrievalPipeline:
         self._retrieval_store = retrieval_store
         self._embedding_provider = embedding_provider
         self._audit_logger = audit_logger
+        self._reranker: Reranker = reranker if reranker is not None else PassthroughReranker()
         self._rrf_k = rrf_k
         self._lexical_weight = lexical_weight
         self._vector_weight = vector_weight
@@ -52,12 +57,14 @@ class RetrievalPipeline:
         top_k: int = 10,
         source_type: str | None = None,
         trace_id: str | None = None,
+        tenant_id: str | None = None,
     ) -> EvidencePackage:
         package, _ = self.retrieve_with_trace(
             query_text=query_text,
             top_k=top_k,
             source_type=source_type,
             trace_id=trace_id,
+            tenant_id=tenant_id,
         )
         return package
 
@@ -68,11 +75,16 @@ class RetrievalPipeline:
         top_k: int = 10,
         source_type: str | None = None,
         trace_id: str | None = None,
+        tenant_id: str | None = None,
     ) -> tuple[EvidencePackage, RetrievalTrace]:
         start = perf_counter()
-        lexical = self._retrieval_store.lexical_search(query_text, top_k=top_k, source_type=source_type)
+        lexical = self._retrieval_store.lexical_search(
+            query_text, top_k=top_k, source_type=source_type, tenant_id=tenant_id
+        )
         vector_query = self._embedding_provider.embed_texts([query_text])[0]
-        vector = self._retrieval_store.vector_search(vector_query, top_k=top_k, source_type=source_type)
+        vector = self._retrieval_store.vector_search(
+            vector_query, top_k=top_k, source_type=source_type, tenant_id=tenant_id
+        )
 
         fused = reciprocal_rank_fusion(
             lexical_hits=lexical,
@@ -82,6 +94,8 @@ class RetrievalPipeline:
             vector_weight=self._vector_weight,
         )
         fused = fused[:top_k]
+        # Apply reranker (no-op if PassthroughReranker)
+        fused = self._reranker.rerank(query_text, fused, top_n=top_k)
         package = build_evidence_package(query_text, fused)
         latency_ms = int((perf_counter() - start) * 1000)
 

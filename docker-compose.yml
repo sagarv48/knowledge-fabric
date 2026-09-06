@@ -3,9 +3,10 @@ services:
     image: pgvector/pgvector:pg16
     container_name: knowledge-fabric-postgres
     environment:
-      POSTGRES_DB: knowledge_fabric
-      POSTGRES_USER: knowledge_fabric
-      POSTGRES_PASSWORD: ""
+      POSTGRES_DB: ${POSTGRES_DB:-knowledge_fabric}
+      POSTGRES_USER: ${POSTGRES_USER:-knowledge_fabric}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     ports:
       - "5432:5432"
     volumes:
@@ -13,7 +14,7 @@ services:
       - ./db/schema:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U knowledge_fabric -d knowledge_fabric"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 10
 
@@ -23,5 +24,16 @@ services:
     ports:
       - "9998:9998"
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: knowledge-fabric-ollama
+    profiles: ["local-ai", "all"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  ollama_data:

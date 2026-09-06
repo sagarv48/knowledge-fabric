@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#141E36" />
+      <stop offset="60%" stop-color="#0A0F1D" />
+      <stop offset="100%" stop-color="#060913" />
+    </radialGradient>
+
+    <!-- Shield Primary Gradient (Cyan to Violet) -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="50%" stop-color="#4FACFE" />
+      <stop offset="85%" stop-color="#8A2387" />
+      <stop offset="100%" stop-color="#9B51E0" />
+    </linearGradient>
+
+    <!-- Lattice Cyan Ribbon -->
+    <linearGradient id="cyanRibbon" x1="0%" y1="0%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#38EF7D" stop-opacity="0.9" />
+      <stop offset="30%" stop-color="#11998E" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#00F2FE" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Lattice Violet Ribbon -->
+    <linearGradient id="violetRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4FACFE" />
+      <stop offset="50%" stop-color="#7F00FF" />
+      <stop offset="100%" stop-color="#E100FF" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGlow)" />
+
+  <!-- Outer Ambient Glow Ring -->
+  <path d="M 256,64 L 396,120 C 396,280 296,388 256,428 C 216,388 116,280 116,120 Z"
+        fill="none"
+        stroke="url(#shieldGrad)"
+        stroke-width="14"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.3"
+        filter="url(#neonGlow)" />
+
+  <!-- Main Shield Boundary -->
+  <path d="M 256,64 L 396,120 C 396,280 296,388 256,428 C 216,388 116,280 116,120 Z"
+        fill="none"
+        stroke="url(#shieldGrad)"
+        stroke-width="8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#subtleGlow)" />
+
+  <!-- Woven Lattice Geometry (The Fabric Threads) -->
+  <!-- Diagonal Ribbons Left-to-Right -->
+  <path d="M 156,136 L 356,336" stroke="#00F2FE" stroke-width="7" stroke-linecap="round" opacity="0.85" />
+  <path d="M 126,200 L 316,390" stroke="#4FACFE" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+  <path d="M 200,88 L 386,274" stroke="#00F2FE" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+
+  <!-- Diagonal Ribbons Right-to-Left (Interweaving over & under) -->
+  <path d="M 356,136 L 156,336" stroke="#9B51E0" stroke-width="7" stroke-linecap="round" opacity="0.85" />
+  <path d="M 386,200 L 196,390" stroke="#7F00FF" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+  <path d="M 312,88 L 126,274" stroke="#E100FF" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+
+  <!-- Central Facet Lattice Structure -->
+  <path d="M 256,64 L 256,428" stroke="url(#shieldGrad)" stroke-width="4" stroke-dasharray="6,6" opacity="0.6" />
+  <polygon points="256,160 320,240 256,320 192,240"
+           fill="#0A0F1D"
+           fill-opacity="0.7"
+           stroke="url(#shieldGrad)"
+           stroke-width="5"
+           stroke-linejoin="round"
+           filter="url(#subtleGlow)" />
+
+  <!-- Core Knowledge & Intent Nexus Node -->
+  <circle cx="256" cy="240" r="14" fill="#00F2FE" filter="url(#subtleGlow)" />
+  <circle cx="256" cy="240" r="6" fill="#FFFFFF" />
+
+  <!-- Peripheral Orbiting Anchors -->
+  <circle cx="192" cy="240" r="5" fill="#4FACFE" />
+  <circle cx="320" cy="240" r="5" fill="#9B51E0" />
+  <circle cx="256" cy="160" r="5" fill="#00F2FE" />
+  <circle cx="256" cy="320" r="5" fill="#7F00FF" />
+
+  <!-- Subtle Inner Crystalline Contour -->
+  <path d="M 256,104 L 356,146 C 356,260 286,344 256,378 C 226,344 156,260 156,146 Z"
+        fill="none"
+        stroke="url(#shieldGrad)"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.4" />
+</svg>

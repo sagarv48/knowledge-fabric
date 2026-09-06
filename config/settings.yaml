@@ -15,12 +15,51 @@ tika:
   request_timeout_seconds: 30
 
 embeddings:
+  # ── Choose your embedding provider ────────────────────────────────────────
+  # Option A (local, free, recommended for dev):
+  #   provider: ollama
+  #   Quick-start: ollama serve && ollama pull nomic-embed-text
+  #   dimension: 768
+  #
+  # Option B (API, free tier, recommended for production):
+  #   provider: cohere
+  #   Requires: COHERE_API_KEY env var
+  #   dimension: 1024
+  #
+  # Option C (API, OpenAI):
+  #   provider: openai
+  #   Requires: OPENAI_API_KEY env var
+  #   dimension: 1536
+  #
+  # Option D (dev/test only — non-functional vector search, emits warning):
   provider: mock
   dimension: 1536
   batch_size: 64
 
 retrieval:
+  # ── Choose your retrieval storage backend ───────────────────────────────
+  # Option A (native PostgreSQL + pgvector, default, zero sprawl):
+  #   Set env: RETRIEVAL_STORE_BACKEND=postgres
+  # Option B (remote Qdrant cluster for 50M+ vector scale):
+  #   Set env: RETRIEVAL_STORE_BACKEND=qdrant
+  #   Requires: QDRANT_URL=http://qdrant-cluster:6333 (optional QDRANT_API_KEY)
+  backend: postgres
   default_top_k: 10
   lexical_weight: 0.5
   vector_weight: 0.5
   rrf_k: 60
+
+reranking:
+  # ── Choose your reranker ──────────────────────────────────────────────────
+  # Option A (local, free, recommended):
+  #   Set env: RERANKER=cross_encoder
+  #   Requires: pip install sentence-transformers (~500MB model downloaded on first use)
+  #   Model: cross-encoder/ms-marco-MiniLM-L-6-v2 (override with CROSS_ENCODER_MODEL)
+  #
+  # Option B (API, best quality, free tier):
+  #   Set env: RERANKER=cohere COHERE_API_KEY=...
+  #   Model: rerank-english-v3.0 (override with COHERE_RERANK_MODEL)
+  #
+  # Option C (no reranking, RRF results only):
+  #   Set env: RERANKER=none  (or leave unset)
+  top_n: 5   # number of chunks returned after reranking

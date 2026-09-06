@@ -43,11 +43,11 @@ def test_cli_main_ingests_and_prints_summary(monkeypatch, capsys) -> None:
             self.connection_factory = connection_factory
 
         @staticmethod
-        def upsert_document(document):
+        def upsert_document(document, *args, **kwargs):
             return 1
 
         @staticmethod
-        def replace_chunks(*, document_id, chunks, embeddings=None):
+        def replace_chunks(*, document_id, chunks, embeddings=None, **kwargs):
             return len(chunks)
 
     class _FakeIngestion:

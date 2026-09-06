@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import urllib.request
+import warnings
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -23,9 +24,28 @@ class EmbeddingProvider(Protocol):
 
 @dataclass(slots=True)
 class MockEmbeddingProvider:
-    """Deterministic provider for local development and tests. NOT for production."""
+    """Deterministic provider for local development and tests. NOT for production.
+
+    Vector search results are meaningless — vectors are SHA-256 hashes of text,
+    not semantic representations. Lexical search still works correctly.
+
+    Switch to a real provider:
+        EMBEDDING_PROVIDER=ollama   (free, local — requires: ollama pull nomic-embed-text)
+        EMBEDDING_PROVIDER=openai   (requires OPENAI_API_KEY)
+        EMBEDDING_PROVIDER=cohere   (requires COHERE_API_KEY, free tier available)
+    """
 
     _dimension: int = 1536
+    _warn: bool = True
+
+    def __post_init__(self) -> None:
+        if self._warn:
+            warnings.warn(
+                "\n\n\u26a0\ufe0f  MockEmbeddingProvider is active.\n"
+                "   Vector search is non-functional — results are hash-based, not semantic.\n"
+                "   Set EMBEDDING_PROVIDER=ollama (free) or openai or cohere for real retrieval.\n",
+                stacklevel=3,
+            )
 
     @property
     def dimension(self) -> int:
@@ -144,17 +164,86 @@ class OpenAIEmbeddingProvider:
         return [item["embedding"] for item in result["data"]]
 
 
+@dataclass(slots=True)
+class CohereEmbeddingProvider:
+    """Calls the Cohere Embed v2 API. Free tier available — no credit card required.
+
+    Recommended models:
+        embed-english-v3.0        1024d, best quality/cost for English corpora
+        embed-multilingual-v3.0   1024d, cross-lingual retrieval
+        embed-english-light-v3.0  384d,  lower latency / storage
+
+    Environment variables:
+        COHERE_API_KEY        (required) — https://dashboard.cohere.com/api-keys
+        COHERE_EMBED_MODEL    default: embed-english-v3.0
+        COHERE_INPUT_TYPE     default: search_document
+                              Use search_query when embedding queries at retrieval time.
+    """
+
+    _model: str
+    _api_key: str
+    _dimension: int
+    _input_type: str
+
+    @classmethod
+    def from_env(cls) -> "CohereEmbeddingProvider":
+        api_key = os.environ.get("COHERE_API_KEY", "")
+        if not api_key:
+            raise EnvironmentError("COHERE_API_KEY environment variable is required")
+        model = os.environ.get("COHERE_EMBED_MODEL", "embed-english-v3.0")
+        input_type = os.environ.get("COHERE_INPUT_TYPE", "search_document")
+        dim_by_model: dict[str, int] = {
+            "embed-english-v3.0": 1024,
+            "embed-multilingual-v3.0": 1024,
+            "embed-english-light-v3.0": 384,
+            "embed-multilingual-light-v3.0": 384,
+            "embed-english-v2.0": 4096,
+        }
+        dimension = dim_by_model.get(model, 1024)
+        return cls(_model=model, _api_key=api_key, _dimension=dimension, _input_type=input_type)
+
+    @property
+    def dimension(self) -> int:
+        return self._dimension
+
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        body = json.dumps({
+            "model": self._model,
+            "texts": texts,
+            "input_type": self._input_type,
+            "embedding_types": ["float"],
+        }).encode("utf-8")
+        request = urllib.request.Request(
+            "https://api.cohere.com/v2/embed",
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self._api_key}",
+                "X-Client-Name": "knowledge-fabric",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=30) as response:
+            result = json.loads(response.read().decode("utf-8"))
+        return result["embeddings"]["float"]
+
+
 def build_embedding_provider(provider_name: str = "", dimension: int = 768) -> EmbeddingProvider:
     """Factory that reads EMBEDDING_PROVIDER env var and returns the right provider.
 
-    EMBEDDING_PROVIDER=mock     → MockEmbeddingProvider (default, dev only)
+    EMBEDDING_PROVIDER=mock     → MockEmbeddingProvider (default, dev only — emits warning)
     EMBEDDING_PROVIDER=ollama   → OllamaEmbeddingProvider.from_env()
     EMBEDDING_PROVIDER=openai   → OpenAIEmbeddingProvider.from_env()
+    EMBEDDING_PROVIDER=cohere   → CohereEmbeddingProvider.from_env()
+
+    Recommended for local dev:  ollama  (free, no API key, run: ollama pull nomic-embed-text)
+    Recommended for production: cohere (free tier) or openai
     """
     name = (provider_name or os.environ.get("EMBEDDING_PROVIDER", "mock")).lower().strip()
     if name == "ollama":
         return OllamaEmbeddingProvider.from_env()
     if name == "openai":
         return OpenAIEmbeddingProvider.from_env()
+    if name == "cohere":
+        return CohereEmbeddingProvider.from_env()
     return MockEmbeddingProvider(_dimension=dimension)
-

@@ -5,6 +5,7 @@ from knowledge_fabric.embeddings.providers import (
     MockEmbeddingProvider,
     OllamaEmbeddingProvider,
     OpenAIEmbeddingProvider,
+    CohereEmbeddingProvider,
     build_embedding_provider,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "MockEmbeddingProvider",
     "OllamaEmbeddingProvider",
     "OpenAIEmbeddingProvider",
+    "CohereEmbeddingProvider",
     "build_embedding_provider",
 ]

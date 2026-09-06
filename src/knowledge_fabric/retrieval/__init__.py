@@ -2,5 +2,11 @@
 
 from knowledge_fabric.retrieval.models import RetrievalHit
 from knowledge_fabric.retrieval.postgres import PostgresRetrievalStore
+from knowledge_fabric.retrieval.store import RetrievalStore, build_retrieval_store
 
-__all__ = ["PostgresRetrievalStore", "RetrievalHit"]
+__all__ = [
+    "PostgresRetrievalStore",
+    "RetrievalHit",
+    "RetrievalStore",
+    "build_retrieval_store",
+]

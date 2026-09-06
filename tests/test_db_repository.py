@@ -84,3 +84,36 @@ def test_replace_chunks_validates_embedding_count() -> None:
 
     with pytest.raises(ValueError, match="embeddings length must match chunks length"):
         repository.replace_chunks(document_id=1, chunks=chunks, embeddings=[[0.1], [0.2]])
+
+
+def test_upsert_document_with_tenant_id() -> None:
+    cursor = _FakeCursor(fetch_rows=[(88,)])
+    connection = _FakeConnection(cursor)
+    repository = KnowledgeRepository(connection_factory=lambda: connection)
+
+    document = Document(
+        source_uri="memory://tenant_doc",
+        source_format=SourceFormat.TXT,
+        content_text="tenant data",
+        title="tenant doc",
+        metadata={},
+    )
+    doc_id = repository.upsert_document(document, tenant_id="tenant-alpha")
+    assert doc_id == 88
+    # Last param in INSERT is tenant_id
+    params = cursor.executions[0][1]
+    assert params[-1] == "tenant-alpha"
+
+
+def test_replace_chunks_with_tenant_id() -> None:
+    cursor = _FakeCursor()
+    connection = _FakeConnection(cursor)
+    repository = KnowledgeRepository(connection_factory=lambda: connection)
+
+    chunks = [Chunk(document_uri="memory://doc", chunk_index=0, chunk_text="a", metadata={})]
+    repository.replace_chunks(document_id=1, chunks=chunks, tenant_id="tenant-beta")
+
+    # The chunk INSERT is execution index 1
+    insert_params = cursor.executions[1][1]
+    assert insert_params[-1] == "tenant-beta"
+

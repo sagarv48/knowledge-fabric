@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from knowledge_fabric.config import Settings, load_settings
@@ -29,7 +30,12 @@ def build_tools_from_settings(settings: Settings) -> KnowledgeFabricMCPTools:
         lexical_weight=settings.retrieval.lexical_weight,
         vector_weight=settings.retrieval.vector_weight,
     )
-    return KnowledgeFabricMCPTools(retrieval_pipeline=pipeline, retrieval_store=retrieval_store)
+    return KnowledgeFabricMCPTools(
+        retrieval_pipeline=pipeline,
+        retrieval_store=retrieval_store,
+        embedding_provider=embedding_provider,
+        connection_factory=connection_factory,
+    )
 
 
 def create_mcp_server(tools: KnowledgeFabricMCPTools) -> Any:
@@ -38,14 +44,44 @@ def create_mcp_server(tools: KnowledgeFabricMCPTools) -> Any:
 
     server = FastMCP("knowledge-fabric")
 
+    @server.tool(name="health_check")
+    def health_check() -> dict[str, object]:
+        """Check server health and return runtime configuration.
+
+        Returns embedding provider name and dimension, DB connectivity status,
+        and approximate document/chunk counts. Useful for AI agents to orient
+        themselves before querying.
+        """
+        return tools.health_check()
+
+    @server.tool(name="list_sources")
+    def list_sources() -> dict[str, object]:
+        """List all ingested source types and their document counts.
+
+        Returns distinct source_type values with document counts so an AI agent
+        can discover what content domains are available before issuing a query.
+        Use source_type as a filter in retrieve_evidence to scope retrieval.
+        """
+        return tools.list_sources()
+
     @server.tool(name="retrieve_evidence")
     def retrieve_evidence(
         query_text: str,
         top_k: int = 10,
         source_type: str | None = None,
         trace_id: str | None = None,
+        tenant_id: str | None = None,
     ) -> dict[str, object]:
-        return tools.retrieve_evidence(query_text=query_text, top_k=top_k, source_type=source_type, trace_id=trace_id)
+        # tenant_id from the call argument takes priority;
+        # fall back to server-level default from environment.
+        effective_tenant = tenant_id or os.environ.get("KF_DEFAULT_TENANT") or None
+        return tools.retrieve_evidence(
+            query_text=query_text,
+            top_k=top_k,
+            source_type=source_type,
+            trace_id=trace_id,
+            tenant_id=effective_tenant,
+        )
 
     @server.tool(name="get_document")
     def get_document(

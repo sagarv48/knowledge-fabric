@@ -17,20 +17,21 @@ class KnowledgeRepository:
     def __init__(self, connection_factory: ConnectionFactory) -> None:
         self._connection_factory = connection_factory
 
-    def upsert_document(self, document: Document) -> int:
+    def upsert_document(self, document: Document, *, tenant_id: str = "default") -> int:
         """Insert or update a document and return its database id."""
         connection = self._connection_factory()
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO documents (source_uri, source_type, title, metadata, content_text)
-                VALUES (%s, %s, %s, %s::jsonb, %s)
+                INSERT INTO documents (source_uri, source_type, title, metadata, content_text, tenant_id)
+                VALUES (%s, %s, %s, %s::jsonb, %s, %s)
                 ON CONFLICT (source_uri)
                 DO UPDATE SET
                   source_type = EXCLUDED.source_type,
                   title = EXCLUDED.title,
                   metadata = EXCLUDED.metadata,
                   content_text = EXCLUDED.content_text,
+                  tenant_id = EXCLUDED.tenant_id,
                   updated_at = NOW()
                 RETURNING id
                 """,
@@ -40,6 +41,7 @@ class KnowledgeRepository:
                     document.title,
                     _to_json(document.metadata),
                     document.content_text,
+                    tenant_id,
                 ],
             )
             row = cursor.fetchone()
@@ -55,6 +57,7 @@ class KnowledgeRepository:
         document_id: int,
         chunks: list[Chunk],
         embeddings: list[list[float]] | None = None,
+        tenant_id: str = "default",
     ) -> int:
         """Replace chunks for one document and return inserted chunk count."""
         if embeddings is not None and len(embeddings) != len(chunks):
@@ -71,8 +74,8 @@ class KnowledgeRepository:
 
                 cursor.execute(
                     """
-                    INSERT INTO chunks (document_id, chunk_index, chunk_text, metadata, embedding)
-                    VALUES (%s, %s, %s, %s::jsonb, %s::vector)
+                    INSERT INTO chunks (document_id, chunk_index, chunk_text, metadata, embedding, tenant_id)
+                    VALUES (%s, %s, %s, %s::jsonb, %s::vector, %s)
                     """,
                     [
                         document_id,
@@ -80,6 +83,7 @@ class KnowledgeRepository:
                         chunk.chunk_text,
                         _to_json(chunk.metadata),
                         embedding_literal,
+                        tenant_id,
                     ],
                 )
 

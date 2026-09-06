@@ -1,0 +1,4 @@
+# End-to-end example requirements
+# Install with: pip install -r requirements.txt
+pyyaml>=6.0
+psycopg[binary]>=3.1.0

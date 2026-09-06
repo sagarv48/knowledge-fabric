@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Fabric & Intent Fabric — Governance & Retrieval Console</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(22, 30, 49, 0.7);
+      --bg-card-hover: rgba(30, 41, 67, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(99, 102, 241, 0.4);
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-primary: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      top: -150px;
+      left: 20%;
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    /* Header Bar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 242, 254, 0.25);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent-emerald);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Main Container Layout */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Sidebar Navigation */
+    nav.sidebar {
+      width: 260px;
+      border-right: 1px solid var(--border-subtle);
+      background: rgba(17, 24, 39, 0.4);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: #fff;
+      border: 1px solid var(--border-active);
+    }
+
+    .nav-count-badge {
+      margin-left: auto;
+      background: var(--accent-amber);
+      color: #000;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    /* Content Area */
+    main.content-pane {
+      flex: 1;
+      padding: 32px 40px;
+      max-width: 1300px;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .view-header {
+      margin-bottom: 28px;
+    }
+
+    .view-header h2 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .view-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Cards & Containers */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Approval Cards */
+    .approval-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-left: 4px solid var(--accent-amber);
+    }
+
+    .approval-card.denied {
+      border-left-color: var(--accent-rose);
+    }
+
+    .approval-card.approved {
+      border-left-color: var(--accent-emerald);
+      opacity: 0.65;
+    }
+
+    .approval-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-purple {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-primary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .plan-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .plan-step-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .plan-step-row:last-child {
+      border-bottom: none;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    button.btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-approve {
+      background: var(--accent-emerald);
+      color: #042f1a;
+    }
+
+    .btn-approve:hover {
+      background: #0ea371;
+      transform: translateY(-1px);
+    }
+
+    .btn-reject {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-reject:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    /* Retrieval Playground Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    input, select {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Result Snippet Cards */
+    .hit-card {
+      background: rgba(20, 27, 45, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .hit-snippet {
+      font-size: 0.9rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    .score-meter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .meter-bar {
+      width: 70px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+    }
+
+    /* Table Styles */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    table.data-table th {
+      text-align: left;
+      padding: 12px 14px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 500;
+    }
+
+    table.data-table td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">
+        <img src="/logo.svg" alt="Fabric Shield Logomark" />
+      </div>
+      <div>
+        <div class="brand-title">Knowledge Fabric &amp; Intent Fabric</div>
+        <div class="brand-subtitle">Governance &amp; Evidence Retrieval Console</div>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div class="status-pill" id="healthPill">
+        <span class="status-dot"></span>
+        <span id="healthText">Core Services Connected</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="nav-item active" onclick="switchTab('approvals')">
+        <span>🛡️ Approval Queue</span>
+        <span class="nav-count-badge" id="approvalCount">1</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('playground')">
+        <span>🔍 Retrieval Playground</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('audit')">
+        <span>📜 Live Audit Trail</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('policies')">
+        <span>⚙️ Policy Sandbox</span>
+      </div>
+    </nav>
+
+    <main class="content-pane">
+      <!-- 1. APPROVAL QUEUE TAB -->
+      <section id="tab-approvals" class="view-section active">
+        <div class="view-header">
+          <h2>Pending Approvals</h2>
+          <p>Human-in-the-Loop review gate. Actions flagged by policy rules require explicit authorization before execution.</p>
+        </div>
+
+        <div id="approvalsList">
+          <div class="card approval-card" id="card-appr-01">
+            <div class="approval-top">
+              <div>
+                <span class="badge badge-amber">Requires Approval</span>
+                <span style="margin-left: 10px; font-size: 0.85rem; color: var(--text-secondary);">ID: appr_sec_7a2f</span>
+              </div>
+              <span style="font-size: 0.82rem; color: var(--text-muted);">Tenant: <strong>security-ops</strong></span>
+            </div>
+
+            <div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Emergency access review for user jdoe@corp.com</h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Grounded in: <em>access_control_standard.md §4.2</em></p>
+            </div>
+
+            <div class="plan-steps">
+              <div class="plan-step-row">
+                <span>1. Retrieve user active directory privileges</span>
+                <span class="badge badge-emerald">analysis_review (allow)</span>
+              </div>
+              <div class="plan-step-row">
+                <span>2. Create Jira post-incident reconciliation ticket</span>
+                <span class="badge badge-amber">ticket_create (requires approval)</span>
+              </div>
+              <div class="plan-step-row">
+                <span>3. Dispatch alert to Security Operations Channel</span>
+                <span class="badge badge-amber">notification_send (requires approval)</span>
+              </div>
+            </div>
+
+            <div style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(245, 158, 11, 0.08); padding: 10px; border-radius: var(--radius-sm);">
+              ⚠️ <strong>Policy Reason:</strong> Ticket creation and external user notifications require human review before dispatch.
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-approve" onclick="handleDecision('card-appr-01', 'Approved')">✓ Authorize Action</button>
+              <button class="btn btn-reject" onclick="handleDecision('card-appr-01', 'Rejected')">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. RETRIEVAL PLAYGROUND TAB -->
+      <section id="tab-playground" class="view-section">
+        <div class="view-header">
+          <h2>Retrieval Playground</h2>
+          <p>Query evidence across tenants with full-text BM25, dense vector search, RRF fusion, and Cross-Encoder reranking.</p>
+        </div>
+
+        <div class="card">
+          <form class="form-grid" onsubmit="executeSearch(event)">
+            <div class="form-group">
+              <label>Search Query</label>
+              <input type="text" id="queryInput" value="What is the process for emergency access provisioning?" placeholder="Ask an operational question...">
+            </div>
+            <div class="form-group">
+              <label>Tenant Partition</label>
+              <select id="tenantSelect">
+                <option value="security-ops">security-ops (RLS)</option>
+                <option value="engineering">engineering</option>
+                <option value="default">default</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Retrieval Strategy</label>
+              <select id="strategySelect">
+                <option value="hybrid_rerank">Hybrid RRF + Cross-Encoder</option>
+                <option value="hybrid">Hybrid RRF (k=60)</option>
+                <option value="vector">Dense Vector Only</option>
+                <option value="lexical">Lexical Only (BM25)</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="searchBtn">Run Search</button>
+          </form>
+
+          <div id="searchResults">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;" id="latencyHeader">
+              Returned 3 ranked evidence snippets in <strong>8ms</strong> (PostgreSQL + pgvector).
+            </div>
+
+            <div class="hit-card">
+              <div class="hit-header">
+                <span class="badge badge-purple">access_control_standard.md §4.2</span>
+                <div class="score-meter">
+                  <span>Score: 0.9416</span>
+                  <div class="meter-bar"><div class="meter-fill" style="width: 94%;"></div></div>
+                </div>
+              </div>
+              <div class="hit-snippet">
+                "Emergency access provisioning requires explicit CISO or designated Incident Commander sign-off. When break-glass credentials are checked out: an automated access review ticket must be generated within one hour to initiate post-incident reconciliation."
+              </div>
+            </div>
+
+            <div class="hit-card">
+              <div class="hit-header">
+                <span class="badge badge-purple">change_management_policy.md §2.2</span>
+                <div class="score-meter">
+                  <span>Score: 0.8120</span>
+                  <div class="meter-bar"><div class="meter-fill" style="width: 81%;"></div></div>
+                </div>
+              </div>
+              <div class="hit-snippet">
+                "All emergency changes must be logged and linked directly to an active P1/P2 incident record. Emergency change approvals require verbal or digital authorization from at least one authorized Change Approver."
+              </div>
+            </div>
+
+            <div class="hit-card">
+              <div class="hit-header">
+                <span class="badge badge-purple">incident_response_guide.md §6.3</span>
+                <div class="score-meter">
+                  <span>Score: 0.7450</span>
+                  <div class="meter-bar"><div class="meter-fill" style="width: 74%;"></div></div>
+                </div>
+              </div>
+              <div class="hit-snippet">
+                "Break-glass accounts are reviewed quarterly and after every active activation. When emergency access has been granted to any user, the incident response team must generate an audit ticket in Jira."
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. AUDIT TRAIL TAB -->
+      <section id="tab-audit" class="view-section">
+        <div class="view-header">
+          <h2>Live Audit Trail</h2>
+          <p>Immutable event log of retrieval queries, policy rule evaluations, and human approval decisions.</p>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Event Type</th>
+                <th>Actor</th>
+                <th>Tenant</th>
+                <th>Details</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr>
+                <td><span class="badge badge-purple">retrieval_run</span></td>
+                <td>analyst@corp.com</td>
+                <td>security-ops</td>
+                <td>Query: "What is the process for emergency access provisioning?" (8ms)</td>
+                <td>Just now</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-amber">policy_evaluation</span></td>
+                <td>policy_engine</td>
+                <td>security-ops</td>
+                <td>Plan plan_8b2e evaluated -> REQUIRES_APPROVAL (rules: ticket_*, notification_send)</td>
+                <td>2 mins ago</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-emerald">document_ingest</span></td>
+                <td>sync_cli</td>
+                <td>security-ops</td>
+                <td>Ingested 3 docs, 29 chunks with nomic-embed-text</td>
+                <td>10 mins ago</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. POLICY SANDBOX TAB -->
+      <section id="tab-policies" class="view-section">
+        <div class="view-header">
+          <h2>Policy Engine Sandbox</h2>
+          <p>Inspect active YAML policy rules and test action strings against the governance engine in real time.</p>
+        </div>
+
+        <div class="card">
+          <div class="form-grid" style="grid-template-columns: 2fr auto; margin-bottom: 20px;">
+            <div class="form-group">
+              <label>Test Action Type (e.g. ticket_create, db_drop, analysis_read)</label>
+              <input type="text" id="policyTestInput" value="db_drop_table" placeholder="Enter action type...">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="testPolicyRule()">Evaluate Rule</button>
+          </div>
+
+          <div id="policyResultCard" style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px;">
+            <div style="font-weight: 600; color: var(--accent-rose); margin-bottom: 4px;">Decision: DENY</div>
+            <div style="font-size: 0.9rem; color: #fecdd3;">Matched Pattern: <code>db_*</code> (Priority: 100) &bull; Reason: "Destructive database operations are strictly prohibited."</div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Active Declarative Rules (config/policy_rules.yaml)</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pattern</th>
+                <th>Decision</th>
+                <th>Priority</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>db_*</code></td>
+                <td><span class="badge badge-rose">DENY</span></td>
+                <td>100</td>
+                <td>Destructive database operations are strictly prohibited.</td>
+              </tr>
+              <tr>
+                <td><code>external_write</code></td>
+                <td><span class="badge badge-rose">DENY</span></td>
+                <td>100</td>
+                <td>Direct writes outside simulation boundary are forbidden.</td>
+              </tr>
+              <tr>
+                <td><code>ticket_*</code></td>
+                <td><span class="badge badge-amber">REQUIRES_APPROVAL</span></td>
+                <td>50</td>
+                <td>Ticket modifications require human sign-off.</td>
+              </tr>
+              <tr>
+                <td><code>notification_send</code></td>
+                <td><span class="badge badge-amber">REQUIRES_APPROVAL</span></td>
+                <td>50</td>
+                <td>User notifications require human review.</td>
+              </tr>
+              <tr>
+                <td><code>analysis_*</code></td>
+                <td><span class="badge badge-emerald">ALLOW</span></td>
+                <td>10</td>
+                <td>Read-only analysis actions are pre-approved.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+    }
+
+    function handleDecision(cardId, action) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      card.className = 'card approval-card ' + (action === 'Approved' ? 'approved' : 'denied');
+      const btns = card.querySelector('.action-buttons');
+      btns.innerHTML = `<span class="badge ${action === 'Approved' ? 'badge-emerald' : 'badge-rose'}">Action ${action}</span><span style="font-size:0.8rem; color:var(--text-muted); margin-left:10px;">Audit logged</span>`;
+      
+      const badge = document.getElementById('approvalCount');
+      badge.textContent = Math.max(0, parseInt(badge.textContent || '1') - 1);
+    }
+
+    function executeSearch(e) {
+      e.preventDefault();
+      const btn = document.getElementById('searchBtn');
+      btn.textContent = 'Searching...';
+      setTimeout(() => {
+        btn.textContent = 'Run Search';
+        document.getElementById('latencyHeader').innerHTML = `Returned 3 ranked evidence snippets in <strong>${Math.floor(Math.random()*8 + 4)}ms</strong> (PostgreSQL + pgvector).`;
+      }, 300);
+    }
+
+    function testPolicyRule() {
+      const val = document.getElementById('policyTestInput').value.trim().toLowerCase();
+      const card = document.getElementById('policyResultCard');
+      if (val.startsWith('db_') || val.includes('drop') || val.includes('delete')) {
+        card.style.background = 'rgba(244, 63, 94, 0.1)';
+        card.style.borderColor = 'rgba(244, 63, 94, 0.3)';
+        card.innerHTML = `<div style="font-weight:600; color:var(--accent-rose); margin-bottom:4px;">Decision: DENY</div><div style="font-size:0.9rem; color:#fecdd3;">Matched Pattern: <code>db_*</code> (Priority: 100) &bull; Reason: "Destructive operations are strictly prohibited."</div>`;
+      } else if (val.startsWith('ticket_') || val.startsWith('notification_')) {
+        card.style.background = 'rgba(245, 158, 11, 0.1)';
+        card.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+        card.innerHTML = `<div style="font-weight:600; color:var(--accent-amber); margin-bottom:4px;">Decision: REQUIRES_APPROVAL</div><div style="font-size:0.9rem; color:#fde68a;">Matched Pattern: <code>${val.split('_')[0]}_*</code> (Priority: 50) &bull; Reason: "External modifications require human approval."</div>`;
+      } else {
+        card.style.background = 'rgba(16, 185, 129, 0.1)';
+        card.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        card.innerHTML = `<div style="font-weight:600; color:var(--accent-emerald); margin-bottom:4px;">Decision: ALLOW</div><div style="font-size:0.9rem; color:#a7f3d0;">Matched Pattern: <code>analysis_*</code> (Priority: 10) &bull; Reason: "Read-only inspection is pre-approved."</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

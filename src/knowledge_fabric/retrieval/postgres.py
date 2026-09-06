@@ -21,8 +21,9 @@ class PostgresRetrievalStore:
         query_text: str,
         top_k: int = 10,
         source_type: str | None = None,
+        tenant_id: str | None = None,
     ) -> list[RetrievalHit]:
-        where_clause, params = self._filter_clause(source_type)
+        where_clause, params = self._filter_clause(source_type=source_type, tenant_id=tenant_id)
         sql = f"""
             SELECT
               c.id,
@@ -40,7 +41,7 @@ class PostgresRetrievalStore:
             LIMIT %s
         """
         query_params = [query_text, query_text, *params, top_k]
-        rows = self._fetch_rows(sql, query_params)
+        rows = self._fetch_rows(sql, query_params, tenant_id=tenant_id)
         return self._rows_to_hits(rows, source="lexical")
 
     def vector_search(
@@ -48,8 +49,9 @@ class PostgresRetrievalStore:
         query_embedding: list[float],
         top_k: int = 10,
         source_type: str | None = None,
+        tenant_id: str | None = None,
     ) -> list[RetrievalHit]:
-        where_clause, params = self._filter_clause(source_type)
+        where_clause, params = self._filter_clause(source_type=source_type, tenant_id=tenant_id)
         sql = f"""
             SELECT
               c.id,
@@ -68,7 +70,7 @@ class PostgresRetrievalStore:
         """
         vector_literal = self._vector_literal(query_embedding)
         query_params = [vector_literal, *params, vector_literal, top_k]
-        rows = self._fetch_rows(sql, query_params)
+        rows = self._fetch_rows(sql, query_params, tenant_id=tenant_id)
         return self._rows_to_hits(rows, source="vector")
 
     def get_document(
@@ -115,10 +117,20 @@ class PostgresRetrievalStore:
         }
 
     @staticmethod
-    def _filter_clause(source_type: str | None) -> tuple[str, list[Any]]:
-        if source_type is None:
-            return "", []
-        return "AND d.source_type = %s", [source_type]
+    def _filter_clause(
+        source_type: str | None = None,
+        tenant_id: str | None = None,
+    ) -> tuple[str, list[Any]]:
+        clauses: list[str] = []
+        params: list[Any] = []
+        if source_type is not None:
+            clauses.append("AND d.source_type = %s")
+            params.append(source_type)
+        if tenant_id is not None:
+            # Application-level tenant filter (Mode 1 — always active when tenant_id set)
+            clauses.append("AND d.tenant_id = %s")
+            params.append(tenant_id)
+        return " ".join(clauses), params
 
     @staticmethod
     def _vector_literal(values: list[float]) -> str:
@@ -126,9 +138,18 @@ class PostgresRetrievalStore:
             raise ValueError("query_embedding must not be empty")
         return "[" + ",".join(f"{value:.8f}" for value in values) + "]"
 
-    def _fetch_rows(self, sql: str, params: list[Any]) -> list[tuple[Any, ...]]:
+    def _fetch_rows(
+        self,
+        sql: str,
+        params: list[Any],
+        tenant_id: str | None = None,
+    ) -> list[tuple[Any, ...]]:
         connection = self._connection_factory()
         with connection.cursor() as cursor:
+            # Mode 2 (RLS): set session variable so Postgres RLS policies fire.
+            # This is a no-op if RLS is not enabled on the table.
+            if tenant_id is not None:
+                cursor.execute("SET LOCAL app.tenant_id = %s", [tenant_id])
             cursor.execute(sql, params)
             rows = cursor.fetchall()
         return rows

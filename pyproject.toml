@@ -19,11 +19,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0"]
+dev = ["pytest>=8.0.0", "ruff>=0.4.0", "pyright>=1.1.0"]
+reranking = ["sentence-transformers>=3.0.0"]
 
 [project.scripts]
 knowledge-fabric-mcp = "knowledge_fabric.mcp.server:run_mcp_server"
 knowledge-fabric-ingest = "knowledge_fabric.ingestion.cli:main"
+knowledge-fabric-sync = "knowledge_fabric.ingestion.sync_cli:main"
+knowledge-fabric-ui = "knowledge_fabric.ui.server:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

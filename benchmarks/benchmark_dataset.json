@@ -1,0 +1,68 @@
+{
+  "corpus": [
+    {
+      "id": "doc_1",
+      "text": "Incident Severity Classification: SEV-1 corresponds to total production outage affecting 50% or more of customer traffic. Escalation to VP of Engineering is required within 15 minutes.",
+      "keywords": ["incident", "severity", "sev-1", "production", "outage", "escalation"]
+    },
+    {
+      "id": "doc_2",
+      "text": "Change Advisory Board (CAB) reviews all normal changes every Tuesday at 10:00 UTC. Emergency changes bypass scheduled CAB but require retrospective review within 48 hours.",
+      "keywords": ["cab", "change advisory board", "normal change", "emergency change", "review"]
+    },
+    {
+      "id": "doc_3",
+      "text": "Emergency Access Provisioning (Break-Glass Protocol): Requires dual authorization from CISO and Incident Commander. Checkout duration cannot exceed four hours and automatically creates a Jira audit ticket.",
+      "keywords": ["emergency access", "break glass", "ciso", "incident commander", "audit ticket", "jira"]
+    },
+    {
+      "id": "doc_4",
+      "text": "Data Retention Standard: All system access logs must be retained in encrypted cold storage for at least 365 days to comply with SOC2 and ISO27001 regulatory mandates.",
+      "keywords": ["data retention", "logs", "encryption", "cold storage", "soc2", "iso27001"]
+    },
+    {
+      "id": "doc_5",
+      "text": "Post-Mortem Policy: Blameless post-incident reviews must be completed within 5 business days for all SEV-1 and SEV-2 incidents. Action items are assigned SLA of 30 calendar days.",
+      "keywords": ["post-mortem", "blameless", "sla", "sev-1", "sev-2", "review"]
+    },
+    {
+      "id": "doc_6",
+      "text": "Database Migration Guidelines: Zero-downtime migrations require backward-compatible schema changes, phased column deprecation, and canary verification in staging prior to production deploy.",
+      "keywords": ["database migration", "zero downtime", "schema", "canary", "production"]
+    }
+  ],
+  "queries": [
+    {
+      "query_id": "q1",
+      "text": "What are the rules and sign-offs needed for break-glass emergency credentials?",
+      "relevant_docs": {
+        "doc_3": 2,
+        "doc_1": 1
+      }
+    },
+    {
+      "query_id": "q2",
+      "text": "What is the escalation SLA and notification threshold for a severe production outage?",
+      "relevant_docs": {
+        "doc_1": 2,
+        "doc_5": 1
+      }
+    },
+    {
+      "query_id": "q3",
+      "text": "How are urgent emergency changes approved outside the standard CAB meeting schedule?",
+      "relevant_docs": {
+        "doc_2": 2,
+        "doc_6": 1
+      }
+    },
+    {
+      "query_id": "q4",
+      "text": "How long must access audit logs be stored for SOC2 compliance?",
+      "relevant_docs": {
+        "doc_4": 2,
+        "doc_3": 1
+      }
+    }
+  ]
+}
