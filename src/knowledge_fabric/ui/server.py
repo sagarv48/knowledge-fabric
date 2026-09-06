@@ -12,7 +12,20 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("knowledge_fabric.ui")
-_STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+def _resolve_static_dir() -> Path:
+    candidates = [
+        Path(__file__).resolve().parent / "static",
+        Path.cwd() / "src" / "knowledge_fabric" / "ui" / "static",
+        Path("/app/src/knowledge_fabric/ui/static"),
+        Path(__file__).resolve().parents[2] / "knowledge_fabric" / "ui" / "static",
+    ]
+    for c in candidates:
+        if c.exists() and (c / "index.html").exists():
+            return c
+    return candidates[0]
+
+_STATIC_DIR = _resolve_static_dir()
 
 
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
