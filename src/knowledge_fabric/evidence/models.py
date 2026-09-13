@@ -22,6 +22,15 @@ class EvidenceItem:
     metadata: dict[str, object] = field(default_factory=dict)
 
 
+    @property
+    def citation_source(self) -> str:
+        """Return human-readable citation source string."""
+        path = self.metadata.get("heading_path")
+        if path:
+            return f"{self.document_uri}#{path}"
+        return self.document_uri
+
+
 @dataclass(slots=True)
 class EvidencePackage:
     """Top-level evidence response."""
@@ -39,8 +48,24 @@ class EvidencePackage:
             "retrieval_summary": self.retrieval_summary,
         }
 
+    def format_citations(self, style: str = "markdown") -> str:
+        """Format evidence items into structured text citations."""
+        if not self.items:
+            return "No citations available."
+        lines: list[str] = []
+        for i, item in enumerate(self.items, 1):
+            heading_str = f" ({item.metadata.get('heading_path')})" if item.metadata.get("heading_path") else ""
+            lines.append(f"[{i}] {item.document_uri}{heading_str} (score: {item.score:.4f})")
+            lines.append(f"    \"{item.snippet}\"")
+        return "\n".join(lines)
 
-def build_evidence_package(query_text: str, hybrid_hits: list[HybridHit]) -> EvidencePackage:
+
+def build_evidence_package(
+    query_text: str,
+    hybrid_hits: list[HybridHit],
+    *,
+    summary_extra: dict[str, object] | None = None,
+) -> EvidencePackage:
     items = [
         EvidenceItem(
             chunk_id=hybrid.hit.chunk_id,
@@ -54,8 +79,11 @@ def build_evidence_package(query_text: str, hybrid_hits: list[HybridHit]) -> Evi
         )
         for hybrid in hybrid_hits
     ]
-    summary = {
+    summary: dict[str, object] = {
         "total_items": len(items),
         "sources": sorted({source for item in items for source in item.retrieval_sources}),
     }
+    if summary_extra:
+        summary.update(summary_extra)
     return EvidencePackage(query_text=query_text, items=items, retrieval_summary=summary)
+

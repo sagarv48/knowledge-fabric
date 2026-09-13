@@ -81,25 +81,17 @@ class KnowledgeFabricMCPTools:
 
         return result
 
-    def list_sources(self) -> dict[str, object]:
+    def list_sources(self, tenant_id: str | None = None) -> dict[str, object]:
         """Return distinct source types and their document counts.
 
-        Allows an AI agent to discover what content domains are available
-        before issuing a retrieve_evidence query.
+        Scoped to tenant_id when provided, so that each tenant only discovers
+        their own content domains. Pass None only for admin/diagnostic contexts.
         """
-        if self._connection_factory is None:
-            return {"sources": [], "error": "No database connection available"}
+        if self._retrieval_store is None:
+            return {"sources": [], "error": "No retrieval store configured"}
 
         try:
-            conn = self._connection_factory()
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT source_type, COUNT(*) AS doc_count "
-                    "FROM documents "
-                    "GROUP BY source_type "
-                    "ORDER BY doc_count DESC"
-                )
-                rows = cur.fetchall()
+            rows = self._retrieval_store.list_sources_for_tenant(tenant_id=tenant_id)
             sources = [
                 {"source_type": str(row[0]), "document_count": int(row[1])}
                 for row in rows
@@ -108,6 +100,7 @@ class KnowledgeFabricMCPTools:
         except Exception as exc:
             return {"sources": [], "error": str(exc)}
 
+
     def retrieve_evidence(
         self,
         query_text: str,
@@ -115,6 +108,7 @@ class KnowledgeFabricMCPTools:
         source_type: str | None = None,
         trace_id: str | None = None,
         tenant_id: str | None = None,
+        mode: str = "hybrid",
     ) -> dict[str, object]:
         package = self._retrieval_pipeline.retrieve_evidence(
             query_text=query_text,
@@ -122,14 +116,63 @@ class KnowledgeFabricMCPTools:
             source_type=source_type,
             trace_id=trace_id,
             tenant_id=tenant_id,
+            mode=mode,
         )
         return package.to_dict()
 
-    def get_document(self, *, document_id: int | None = None, source_uri: str | None = None) -> dict[str, Any] | None:
-        return self._retrieval_store.get_document(document_id=document_id, source_uri=source_uri)
+    def get_document(
+        self,
+        *,
+        document_id: int | None = None,
+        source_uri: str | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        return self._retrieval_store.get_document(
+            document_id=document_id,
+            source_uri=source_uri,
+            tenant_id=tenant_id,
+        )
 
-    def explain_retrieval(self, query_text: str, top_k: int = 10, source_type: str | None = None) -> dict[str, Any]:
-        return self._retrieval_pipeline.explain_retrieval(query_text=query_text, top_k=top_k, source_type=source_type)
+    def explain_retrieval(
+        self,
+        query_text: str,
+        top_k: int = 10,
+        source_type: str | None = None,
+        tenant_id: str | None = None,
+        mode: str = "hybrid",
+    ) -> dict[str, Any]:
+        return self._retrieval_pipeline.explain_retrieval(
+            query_text=query_text,
+            top_k=top_k,
+            source_type=source_type,
+            tenant_id=tenant_id,
+            mode=mode,
+        )
+
+    def get_index_status(self, tenant_id: str | None = None) -> dict[str, Any]:
+        """Return diagnostic index breakdown by source, document/chunk counts, and backend."""
+        if hasattr(self._retrieval_store, "get_index_status"):
+            return self._retrieval_store.get_index_status(tenant_id=tenant_id)
+        return {
+            "tenant_id": tenant_id or "all",
+            "error": "Retrieval store does not support get_index_status",
+        }
+
+    def get_evidence(self, chunk_id: int, tenant_id: str | None = None) -> dict[str, Any] | None:
+        """Fetch one chunk/evidence passage by ID scoped to tenant."""
+        if hasattr(self._retrieval_store, "get_chunk"):
+            return self._retrieval_store.get_chunk(chunk_id=chunk_id, tenant_id=tenant_id)
+        return None
+
+    def check_consistency(self, tenant_id: str | None = None) -> dict[str, Any]:
+        """Verify relational database integrity and detect orphaned records."""
+        if hasattr(self._retrieval_store, "check_consistency"):
+            return self._retrieval_store.check_consistency(tenant_id=tenant_id)
+        return {
+            "tenant_id": tenant_id or "all",
+            "is_healthy": True,
+            "status": "unsupported_by_backend",
+        }
 
 
 def _get_mock_provider_type() -> type:

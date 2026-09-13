@@ -1,10 +1,146 @@
+version: "1.0.0"
+dataset_id: "knowledge-fabric-seed-eval-v1"
+license: "Apache-2.0"
+provenance: "Knowledge Fabric official benchmark query suite covering technical architecture, data contracts, and search modes"
+
+corpus:
+  - id: 101
+    document_uri: "docs/architecture.md"
+    source_type: "markdown"
+    text: "Reciprocal Rank Fusion (RRF) combines rankings from multiple retrieval legs (lexical full-text search and dense vector search) without requiring calibrated score normalization. Formula: score = sum(1.0 / (rrf_k + rank)). Default rrf_k is 60."
+  - id: 102
+    document_uri: "docs/architecture.md"
+    source_type: "markdown"
+    text: "RRF tie-breaking and candidate pool deduplication ensures deterministic ordering across hybrid retrieval calls."
+  - id: 103
+    document_uri: "docs/architecture.md"
+    source_type: "markdown"
+    text: "Chunking strategy for markdown headings extracts hierarchical title paths and preserves structural section boundaries."
+  - id: 201
+    document_uri: "docs/data-model.md"
+    source_type: "postgres"
+    text: "PostgreSQL with pgvector extension enables vector search using cosine similarity, inner product, and HNSW indexes."
+  - id: 202
+    document_uri: "docs/data-model.md"
+    source_type: "postgres"
+    text: "Vector retrieval with pgvector computes nearest neighbor chunk embeddings against the user query vector."
+  - id: 301
+    document_uri: "docs/evidence-package-contract.md"
+    source_type: "markdown"
+    text: "Evidence package response model: top-level EvidencePackage contains query_text, items list, and retrieval_summary."
+  - id: 302
+    document_uri: "docs/evidence-package-contract.md"
+    source_type: "markdown"
+    text: "Each EvidenceItem in the evidence package contains chunk_id, document_uri, snippet text, fused score, and provenance sources."
+  - id: 401
+    document_uri: "src/knowledge_fabric/retrieval/postgres.py"
+    source_type: "python"
+    text: "PostgresRetrievalStore implements lexical_search using websearch_to_tsquery and vector_search using pgvector cosine distance."
+  - id: 501
+    document_uri: "docs/data-model.md"
+    source_type: "markdown"
+    text: "Data lifecycle management provides delete_document, delete_by_source, and purge_tenant for complete cascading document cleanup."
+  - id: 601
+    document_uri: "docs/security-and-data-boundaries.md"
+    source_type: "markdown"
+    text: "ApprovedRuntimeActionAdapter implements a cryptographic approval gate using HMAC-SHA256 verification tokens."
+
 queries:
-  - id: q1
+  # Backward-compatible baseline queries
+  - id: "q1"
+    category: "exact"
     text: "chunking strategy for markdown headings"
     relevant_chunk_ids: [101, 103]
-  - id: q2
+    expected_document_uris: ["docs/architecture.md"]
+    description: "Hierarchical markdown chunking boundaries"
+
+  - id: "q2"
+    category: "exact"
     text: "vector retrieval with pgvector"
     relevant_chunk_ids: [202]
-  - id: q3
+    expected_document_uris: ["docs/data-model.md"]
+    description: "pgvector similarity retrieval"
+
+  - id: "q3"
+    category: "exact"
     text: "evidence package response model"
     relevant_chunk_ids: [301, 302]
+    expected_document_uris: ["docs/evidence-package-contract.md"]
+    description: "Evidence packaging response schema"
+
+  # Exact Keyword / Identifier queries
+  - id: "q-exact-01"
+    category: "exact"
+    text: "Reciprocal Rank Fusion rrf_k"
+    relevant_chunk_ids: [101, 102]
+    expected_document_uris: ["docs/architecture.md"]
+    description: "Exact technical term query testing lexical match for RRF algorithm parameter"
+
+  - id: "q-exact-02"
+    category: "exact"
+    text: "PostgresRetrievalStore lexical_search vector_search"
+    relevant_chunk_ids: [401]
+    expected_document_uris: ["src/knowledge_fabric/retrieval/postgres.py"]
+    description: "Exact method signature query for PostgreSQL search store adapter"
+
+  # Paraphrase / Semantic queries
+  - id: "q-paraphrase-01"
+    category: "paraphrase"
+    text: "How do we merge ranked search outputs from multiple retrieval engines without biased scores?"
+    relevant_chunk_ids: [101, 102]
+    expected_document_uris: ["docs/architecture.md"]
+    description: "Semantic paraphrase of reciprocal rank fusion concept"
+
+  - id: "q-paraphrase-02"
+    category: "paraphrase"
+    text: "Standardized structure returned to AI agents containing citations, provenance snippets, and retrieval metrics"
+    relevant_chunk_ids: [301, 302]
+    expected_document_uris: ["docs/evidence-package-contract.md"]
+    description: "Semantic description of the evidence packaging layer"
+
+  - id: "q-paraphrase-03"
+    category: "paraphrase"
+    text: "Safely removing indexed files and documents for specific tenants and namespaces"
+    relevant_chunk_ids: [501]
+    expected_document_uris: ["docs/data-model.md"]
+    description: "Semantic query for tenant purge and document deletion lifecycle"
+
+  # Disagreement queries (Lexical and Vector retrieve disjoint candidate sets; hybrid resolves)
+  - id: "q-disagree-01"
+    category: "disagreement"
+    text: "dense vector cosine distance nearest neighbor search"
+    relevant_chunk_ids: [201, 202]
+    expected_document_uris: ["docs/data-model.md"]
+    description: "Query where vector semantics and lexical keywords emphasize different terms"
+
+  - id: "q-disagree-02"
+    category: "disagreement"
+    text: "cryptographic confirmation tokens for enterprise tool execution"
+    relevant_chunk_ids: [601]
+    expected_document_uris: ["docs/security-and-data-boundaries.md"]
+    description: "Cryptographic approval gate paraphrase vs HMAC keywords"
+
+  # Metadata-filtered queries
+  - id: "q-meta-01"
+    category: "metadata"
+    text: "retrieval storage adapter implementation"
+    relevant_chunk_ids: [401]
+    filters:
+      source_type: "python"
+    expected_document_uris: ["src/knowledge_fabric/retrieval/postgres.py"]
+    description: "Metadata-constrained query filtering by python source type"
+
+  # Negative / Unanswerable queries (Out of domain / non-existent)
+  - id: "q-unanswerable-01"
+    category: "unanswerable"
+    text: "quantum computing superconductor qubit Josephson junction fabrication"
+    relevant_chunk_ids: []
+    expected_document_uris: []
+    description: "Out of domain negative query: zero relevant chunks exist"
+
+  - id: "q-unanswerable-02"
+    category: "unanswerable"
+    text: "sourdough bread baking temperature fermentation schedule 75 percent hydration"
+    relevant_chunk_ids: []
+    expected_document_uris: []
+    description: "Completely unrelated culinary query expecting no retrieved results"

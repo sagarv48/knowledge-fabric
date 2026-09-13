@@ -37,6 +37,13 @@ class RetrievalSettings:
     lexical_weight: float
     vector_weight: float
     rrf_k: int
+    backend: str = "postgres"
+
+
+@dataclass(slots=True)
+class RerankingSettings:
+    provider: str = "none"
+    top_n: int = 5
 
 
 @dataclass(slots=True)
@@ -53,16 +60,29 @@ class Settings:
     tika: TikaSettings
     embeddings: EmbeddingSettings
     retrieval: RetrievalSettings
+    reranking: RerankingSettings
 
 
 def load_settings(path: str | Path = "config/settings.yaml") -> Settings:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    retrieval_raw = _as_dict(raw, "retrieval")
+    reranking_raw = raw.get("reranking") or {}
     return Settings(
         app=AppSettings(**_as_dict(raw, "app")),
         database=DatabaseSettings(**_as_dict(raw, "database")),
         tika=TikaSettings(**_as_dict(raw, "tika")),
         embeddings=EmbeddingSettings(**_as_dict(raw, "embeddings")),
-        retrieval=RetrievalSettings(**_as_dict(raw, "retrieval")),
+        retrieval=RetrievalSettings(
+            default_top_k=retrieval_raw["default_top_k"],
+            lexical_weight=retrieval_raw["lexical_weight"],
+            vector_weight=retrieval_raw["vector_weight"],
+            rrf_k=retrieval_raw["rrf_k"],
+            backend=str(retrieval_raw.get("backend", "postgres")),
+        ),
+        reranking=RerankingSettings(
+            provider=str(reranking_raw.get("provider", "none")),
+            top_n=int(reranking_raw.get("top_n", 5)),
+        ),
     )
 
 

@@ -23,26 +23,58 @@ _BINARY_EXTENSIONS: dict[str, SourceFormat] = {
     ".pptx": SourceFormat.PPTX,
 }
 
+_DEFAULT_MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024  # 25MB
+_MD_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+_HTML_TITLE_PATTERN = re.compile(r"(?i)<title\b[^>]*>(.*?)</title>")
+_HTML_HEADING_PATTERN = re.compile(r"(?i)<h[1-6]\b[^>]*>(.*?)</h[1-6]>")
+
 
 class DocumentIngestionService:
-    """Ingest source files into canonical `Document` models."""
+    """Ingest source files into canonical `Document` models with security bounds."""
 
-    def __init__(self, tika_client: TikaClient) -> None:
+    def __init__(
+        self,
+        tika_client: TikaClient,
+        max_file_size_bytes: int = _DEFAULT_MAX_FILE_SIZE_BYTES,
+    ) -> None:
         self._tika_client = tika_client
+        self._max_file_size_bytes = max_file_size_bytes
 
     def ingest_file(
         self,
         file_path: str | Path,
         source_metadata: dict[str, object] | None = None,
     ) -> Document:
-        """Ingest one supported file and preserve source metadata."""
+        """Ingest one supported file, enforce size bounds, and preserve source metadata."""
         resolved = Path(file_path).expanduser().resolve()
         if not resolved.exists():
             raise FileNotFoundError(f"File not found: {resolved}")
 
+        file_size = resolved.stat().st_size
+        if file_size > self._max_file_size_bytes:
+            raise ValueError(
+                f"File size {file_size} bytes exceeds maximum configured limit of {self._max_file_size_bytes} bytes: {resolved.name}"
+            )
+
         source_format = self._resolve_source_format(resolved.suffix.lower())
+        title = resolved.stem
+        headings: list[str] = []
+
         if source_format in _TEXT_EXTENSIONS.values():
-            content_text = self._extract_text_content(resolved, source_format)
+            raw_text = resolved.read_text(encoding="utf-8", errors="replace")
+            if source_format is SourceFormat.MARKDOWN:
+                content_text = raw_text
+                # Extract markdown headings
+                extracted_headings = [m.group(2).strip() for m in _MD_HEADING_PATTERN.finditer(raw_text)]
+                if extracted_headings:
+                    headings = extracted_headings
+            elif source_format is SourceFormat.HTML:
+                # Extract HTML title and headings
+                title_match = _HTML_TITLE_PATTERN.search(raw_text)
+                headings = [unescape(m.group(1)).strip() for m in _HTML_HEADING_PATTERN.finditer(raw_text)]
+                content_text = _strip_html(raw_text)
+            else:
+                content_text = raw_text
         else:
             content_text = self._tika_client.extract_text(resolved)
 
@@ -50,7 +82,7 @@ class DocumentIngestionService:
             "source_path": str(resolved),
             "file_name": resolved.name,
             "file_extension": resolved.suffix.lower(),
-            "file_size_bytes": resolved.stat().st_size,
+            "file_size_bytes": file_size,
         }
         if source_metadata:
             metadata.update(source_metadata)
@@ -59,7 +91,8 @@ class DocumentIngestionService:
             source_uri=str(resolved),
             source_format=source_format,
             content_text=content_text.strip(),
-            title=resolved.stem,
+            title=title,
+            headings=headings,
             metadata=metadata,
         )
 
@@ -70,13 +103,6 @@ class DocumentIngestionService:
         if extension in _BINARY_EXTENSIONS:
             return _BINARY_EXTENSIONS[extension]
         raise ValueError(f"Unsupported file extension: {extension}")
-
-    @staticmethod
-    def _extract_text_content(file_path: Path, source_format: SourceFormat) -> str:
-        text = file_path.read_text(encoding="utf-8")
-        if source_format is SourceFormat.HTML:
-            return _strip_html(text)
-        return text
 
 
 def _strip_html(raw_html: str) -> str:

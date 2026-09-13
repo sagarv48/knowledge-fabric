@@ -57,9 +57,11 @@ def test_cross_encoder_reranks_by_model_scores():
     hits = [_make_hit(i, float(i)) for i in range(3)]
 
     mock_model = MagicMock()
-    import numpy as np
     # Model says: hit[2] is best, hit[0] next, hit[1] worst
-    mock_model.predict.return_value = np.array([0.5, 0.1, 0.9])
+    # Use a MagicMock whose .tolist() returns the scores list (avoids numpy dep)
+    prediction = MagicMock()
+    prediction.tolist.return_value = [0.5, 0.1, 0.9]
+    mock_model.predict.return_value = prediction
 
     reranker = CrossEncoderReranker()
     reranker._model = mock_model  # inject mock to bypass import
@@ -67,6 +69,7 @@ def test_cross_encoder_reranks_by_model_scores():
     result = reranker.rerank("query", hits, top_n=3)
     # Expected order: chunk_id 2 (score 0.9), 0 (0.5), 1 (0.1)
     assert [h.chunk_id for h in result] == [2, 0, 1]
+
 
 
 def test_cross_encoder_from_env_reads_model_name(monkeypatch):

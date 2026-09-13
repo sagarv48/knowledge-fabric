@@ -78,29 +78,38 @@ class PostgresRetrievalStore:
         *,
         document_id: int | None = None,
         source_uri: str | None = None,
+        tenant_id: str | None = None,
     ) -> dict[str, Any] | None:
-        """Fetch one document by id or source URI."""
+        """Fetch one document by id or source URI.
+
+        When tenant_id is provided, the query is scoped to that tenant so that
+        cross-tenant lookups return None rather than leaking other tenants' data.
+        """
         if document_id is None and source_uri is None:
             raise ValueError("document_id or source_uri must be provided")
 
+        tenant_clause, tenant_params = self._filter_clause(tenant_id=tenant_id)
+
         if document_id is not None:
-            sql = """
+            sql = f"""
                 SELECT id, source_uri, source_type, title, metadata, content_text, created_at, updated_at
                 FROM documents
                 WHERE id = %s
+                  {tenant_clause}
                 LIMIT 1
             """
-            params = [document_id]
+            params: list[Any] = [document_id, *tenant_params]
         else:
-            sql = """
+            sql = f"""
                 SELECT id, source_uri, source_type, title, metadata, content_text, created_at, updated_at
                 FROM documents
                 WHERE source_uri = %s
+                  {tenant_clause}
                 LIMIT 1
             """
-            params = [source_uri]
+            params = [source_uri, *tenant_params]
 
-        rows = self._fetch_rows(sql, params)
+        rows = self._fetch_rows(sql, params, tenant_id=tenant_id)
         if not rows:
             return None
 
@@ -115,6 +124,88 @@ class PostgresRetrievalStore:
             "created_at": row[6],
             "updated_at": row[7],
         }
+
+    def list_sources_for_tenant(
+        self,
+        tenant_id: str | None = None,
+    ) -> list[tuple[Any, ...]]:
+        """Return (source_type, doc_count) rows scoped to tenant_id.
+
+        Replaces the un-scoped COUNT(*) used by the old list_sources path.
+        When tenant_id is None, returns counts across all tenants (admin use only).
+        """
+        tenant_clause, tenant_params = self._filter_clause(tenant_id=tenant_id)
+        sql = f"""
+            SELECT source_type, COUNT(*) AS doc_count
+            FROM documents
+            WHERE TRUE
+              {tenant_clause}
+            GROUP BY source_type
+            ORDER BY doc_count DESC
+        """
+        return self._fetch_rows(sql, tenant_params, tenant_id=tenant_id)
+
+    def delete_document(
+        self,
+        *,
+        document_id: int | None = None,
+        source_uri: str | None = None,
+        tenant_id: str | None = None,
+    ) -> bool:
+        """Delete one document scoped to tenant_id, cascading to its chunks."""
+        from knowledge_fabric.db.repository import KnowledgeRepository
+
+        repo = KnowledgeRepository(connection_factory=self._connection_factory)
+        return repo.delete_document(
+            document_id=document_id,
+            source_uri=source_uri,
+            tenant_id=tenant_id,
+        )
+
+    def purge_tenant(
+        self,
+        tenant_id: str,
+    ) -> dict[str, Any]:
+        """Purge all documents, chunks, and operational data for a tenant."""
+        from knowledge_fabric.db.repository import KnowledgeRepository
+
+        repo = KnowledgeRepository(connection_factory=self._connection_factory)
+        return repo.purge_tenant(tenant_id=tenant_id)
+
+    def get_chunk(
+        self,
+        *,
+        chunk_id: int,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Fetch one chunk by id scoped to tenant_id."""
+        from knowledge_fabric.db.repository import KnowledgeRepository
+
+        repo = KnowledgeRepository(connection_factory=self._connection_factory)
+        return repo.get_chunk(chunk_id, tenant_id=tenant_id)
+
+    def get_index_status(
+        self,
+        *,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Query index health, document counts, and source distribution."""
+        from knowledge_fabric.db.repository import KnowledgeRepository
+
+        repo = KnowledgeRepository(connection_factory=self._connection_factory)
+        return repo.get_index_status(tenant_id=tenant_id)
+
+    def check_consistency(
+        self,
+        *,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Validate database relational invariants and detect orphaned records."""
+        from knowledge_fabric.db.repository import KnowledgeRepository
+
+        repo = KnowledgeRepository(connection_factory=self._connection_factory)
+        return repo.check_consistency(tenant_id=tenant_id)
+
 
     @staticmethod
     def _filter_clause(

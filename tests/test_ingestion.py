@@ -97,3 +97,73 @@ def test_ingest_rejects_unsupported_extension(tmp_path: Path) -> None:
     service = DocumentIngestionService(TikaClient(endpoint="http://localhost:9998"))
     with pytest.raises(ValueError, match="Unsupported file extension"):
         service.ingest_file(input_file)
+
+
+def test_ingest_computes_content_hash_and_length(tmp_path: Path) -> None:
+    input_file = tmp_path / "hashed.md"
+    content = "# Title\n\nSome body text for hash testing."
+    input_file.write_text(content, encoding="utf-8")
+
+    service = DocumentIngestionService(TikaClient(endpoint="http://localhost:9998"))
+    document = service.ingest_file(input_file)
+
+    import hashlib
+    expected_hash = hashlib.sha256(content.strip().encode("utf-8")).hexdigest()
+    assert document.content_hash == expected_hash
+    assert document.content_length == len(content.strip())
+    assert document.metadata["content_hash"] == expected_hash
+    assert document.metadata["content_length"] == len(content.strip())
+
+
+def test_ingest_enforces_max_file_size(tmp_path: Path) -> None:
+    input_file = tmp_path / "large.txt"
+    input_file.write_text("X" * 1024, encoding="utf-8")
+
+    service = DocumentIngestionService(
+        TikaClient(endpoint="http://localhost:9998"),
+        max_file_size_bytes=512,
+    )
+    with pytest.raises(ValueError, match="exceeds maximum configured limit"):
+        service.ingest_file(input_file)
+
+
+def test_ingest_extracts_headings_from_markdown(tmp_path: Path) -> None:
+    input_file = tmp_path / "headings.md"
+    content = "# Main Topic\nContent\n## Subtopic A\nContent\n### Detail 1\nContent\n## Subtopic B\nContent"
+    input_file.write_text(content, encoding="utf-8")
+
+    service = DocumentIngestionService(TikaClient(endpoint="http://localhost:9998"))
+    document = service.ingest_file(input_file)
+
+    assert document.headings == ["Main Topic", "Subtopic A", "Detail 1", "Subtopic B"]
+    assert document.metadata["headings"] == ["Main Topic", "Subtopic A", "Detail 1", "Subtopic B"]
+
+
+def test_ingest_extracts_headings_from_html(tmp_path: Path) -> None:
+    input_file = tmp_path / "page.html"
+    content = "<html><head><title>Page Title</title></head><body><h1>Main Title</h1><h2>Section 1</h2><p>Text</p></body></html>"
+    input_file.write_text(content, encoding="utf-8")
+
+    service = DocumentIngestionService(TikaClient(endpoint="http://localhost:9998"))
+    document = service.ingest_file(input_file)
+
+    assert document.headings == ["Main Title", "Section 1"]
+    assert document.metadata["headings"] == ["Main Title", "Section 1"]
+
+
+def test_ingestion_record_and_status_models() -> None:
+    from knowledge_fabric.ingestion.models import IngestionRecord, IngestionStatus
+
+    record = IngestionRecord(
+        source_path="/path/to/doc.pdf",
+        status=IngestionStatus.ADDED,
+        document_id=42,
+        chunks_count=15,
+        duration_ms=123.4,
+    )
+    assert record.status is IngestionStatus.ADDED
+    assert record.status.value == "added"
+    assert record.document_id == 42
+    assert record.chunks_count == 15
+    assert record.error_message is None
+

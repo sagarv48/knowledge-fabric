@@ -1,0 +1,1167 @@
+{
+  "dataset_id": "knowledge-fabric-seed-eval-v1",
+  "dataset_version": "1.0.0",
+  "generated_at": "2026-09-13T09:04:39.369682+00:00",
+  "quality_gate_passed": true,
+  "quality_gate_failures": [],
+  "system_info": {
+    "dataset_provenance": "Knowledge Fabric official benchmark query suite covering technical architecture, data contracts, and search modes",
+    "pipeline": "RetrievalPipeline (InMemoryEvaluationStore + MockEmbeddingProvider)",
+    "modes_evaluated": [
+      "lexical",
+      "vector",
+      "hybrid"
+    ],
+    "top_k": 10
+  },
+  "modes": {
+    "lexical": {
+      "mode": "lexical",
+      "recall_at_10": 0.9545454545454546,
+      "precision_at_5": 0.29090909090909095,
+      "mrr": 0.8060606060606061,
+      "ndcg_at_10": 0.8061434384946871,
+      "no_result_accuracy": 1.0,
+      "avg_latency_ms": 0.05083842776142634,
+      "p95_latency_ms": 0.10419997852295637,
+      "query_count": 13,
+      "answerable_count": 11,
+      "unanswerable_count": 2,
+      "by_category": {
+        "exact": {
+          "count": 5.0,
+          "recall_at_10": 0.9,
+          "precision_at_5": 0.28,
+          "mrr": 1.0,
+          "ndcg_at_10": 0.9226294385530917,
+          "no_result_accuracy": 0.0
+        },
+        "paraphrase": {
+          "count": 3.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.3333333333333333,
+          "mrr": 0.7777777777777778,
+          "ndcg_at_10": 0.7656453681620791,
+          "no_result_accuracy": 0.0
+        },
+        "disagreement": {
+          "count": 2.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.30000000000000004,
+          "mrr": 0.6666666666666666,
+          "ndcg_at_10": 0.7853208594776601,
+          "no_result_accuracy": 0.0
+        },
+        "metadata": {
+          "count": 1.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.2,
+          "mrr": 0.2,
+          "ndcg_at_10": 0.38685280723454163,
+          "no_result_accuracy": 0.0
+        },
+        "unanswerable": {
+          "count": 2.0,
+          "recall_at_10": 0.0,
+          "precision_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0,
+          "no_result_accuracy": 1.0
+        }
+      }
+    },
+    "vector": {
+      "mode": "vector",
+      "recall_at_10": 1.0,
+      "precision_at_5": 0.18181818181818182,
+      "mrr": 0.37384559884559887,
+      "ndcg_at_10": 0.546945016365034,
+      "no_result_accuracy": 0.0,
+      "avg_latency_ms": 0.041338453929011636,
+      "p95_latency_ms": 0.09549991227686405,
+      "query_count": 13,
+      "answerable_count": 11,
+      "unanswerable_count": 2,
+      "by_category": {
+        "exact": {
+          "count": 5.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.24000000000000005,
+          "mrr": 0.4288888888888889,
+          "ndcg_at_10": 0.5959070235579832,
+          "no_result_accuracy": 0.0
+        },
+        "paraphrase": {
+          "count": 3.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.20000000000000004,
+          "mrr": 0.2253968253968254,
+          "ndcg_at_10": 0.4394706839473324,
+          "no_result_accuracy": 0.0
+        },
+        "disagreement": {
+          "count": 2.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.0,
+          "mrr": 0.14583333333333331,
+          "ndcg_at_10": 0.3592240051917306,
+          "no_result_accuracy": 0.0
+        },
+        "metadata": {
+          "count": 1.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.2,
+          "mrr": 1.0,
+          "ndcg_at_10": 1.0,
+          "no_result_accuracy": 0.0
+        },
+        "unanswerable": {
+          "count": 2.0,
+          "recall_at_10": 0.0,
+          "precision_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0,
+          "no_result_accuracy": 0.0
+        }
+      }
+    },
+    "hybrid": {
+      "mode": "hybrid",
+      "recall_at_10": 1.0,
+      "precision_at_5": 0.29090909090909095,
+      "mrr": 0.5818181818181819,
+      "ndcg_at_10": 0.6843994877583578,
+      "no_result_accuracy": 0.0,
+      "avg_latency_ms": 0.07611537316384223,
+      "p95_latency_ms": 0.09049999061971903,
+      "query_count": 13,
+      "answerable_count": 11,
+      "unanswerable_count": 2,
+      "by_category": {
+        "exact": {
+          "count": 5.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.32,
+          "mrr": 0.8400000000000001,
+          "ndcg_at_10": 0.8528136245145183,
+          "no_result_accuracy": 0.0
+        },
+        "paraphrase": {
+          "count": 3.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.26666666666666666,
+          "mrr": 0.3444444444444444,
+          "ndcg_at_10": 0.5209182567475225,
+          "no_result_accuracy": 0.0
+        },
+        "disagreement": {
+          "count": 2.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.30000000000000004,
+          "mrr": 0.3333333333333333,
+          "ndcg_at_10": 0.5353208594776601,
+          "no_result_accuracy": 0.0
+        },
+        "metadata": {
+          "count": 1.0,
+          "recall_at_10": 1.0,
+          "precision_at_5": 0.2,
+          "mrr": 0.5,
+          "ndcg_at_10": 0.6309297535714575,
+          "no_result_accuracy": 0.0
+        },
+        "unanswerable": {
+          "count": 2.0,
+          "recall_at_10": 0.0,
+          "precision_at_5": 0.0,
+          "mrr": 0.0,
+          "ndcg_at_10": 0.0,
+          "no_result_accuracy": 0.0
+        }
+      }
+    }
+  },
+  "per_query_results": [
+    {
+      "mode": "lexical",
+      "query_id": "q1",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        103,
+        101,
+        501
+      ],
+      "relevant_chunk_ids": [
+        101,
+        103
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.10419997852295637
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q2",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        202,
+        101,
+        201,
+        401,
+        102,
+        301
+      ],
+      "relevant_chunk_ids": [
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.07219996768981218
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q3",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        301,
+        302
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.039899954572319984
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-exact-01",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 0.5,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 0.6131471927654584,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03269989974796772
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-exact-02",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.029199989512562752
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-paraphrase-01",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        401,
+        102,
+        103,
+        201,
+        202,
+        301,
+        302,
+        501
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 0.9197207891481876,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.06280001252889633
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-paraphrase-02",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        301,
+        101,
+        202,
+        302,
+        401,
+        102,
+        201,
+        103,
+        501,
+        601
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 0.8772153153380493,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.07219996768981218
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-paraphrase-03",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        103,
+        501,
+        102,
+        201,
+        301,
+        302,
+        401
+      ],
+      "relevant_chunk_ids": [
+        501
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.05309993866831064
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-disagree-01",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        101,
+        201,
+        202
+      ],
+      "relevant_chunk_ids": [
+        201,
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5706417189553201,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.04139996599406004
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-disagree-02",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        601,
+        101,
+        103,
+        501
+      ],
+      "relevant_chunk_ids": [
+        601
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.047699897550046444
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-meta-01",
+      "category": "metadata",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        102,
+        202,
+        301,
+        401,
+        601
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.2,
+      "ndcg": 0.38685280723454163,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.038499943912029266
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-unanswerable-01",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03300001844763756
+    },
+    {
+      "mode": "lexical",
+      "query_id": "q-unanswerable-02",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03400002606213093
+    },
+    {
+      "mode": "vector",
+      "query_id": "q1",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        101,
+        103
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.5,
+      "ndcg": 0.6934264036172708,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.09549991227686405
+    },
+    {
+      "mode": "vector",
+      "query_id": "q2",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.0,
+      "mrr": 0.1111111111111111,
+      "ndcg": 0.3010299956639812,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.04249997437000275
+    },
+    {
+      "mode": "vector",
+      "query_id": "q3",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.2,
+      "ndcg": 0.41443699955334395,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03750005271285772
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-exact-01",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5706417189553201,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03830005880445242
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-exact-02",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03750005271285772
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-paraphrase-01",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5706417189553201,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.0347999157384038
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-paraphrase-02",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.2,
+      "ndcg": 0.41443699955334395,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03699993249028921
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-paraphrase-03",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        501
+      ],
+      "recall": 1.0,
+      "precision": 0.0,
+      "mrr": 0.14285714285714285,
+      "ndcg": 0.3333333333333333,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03530003596097231
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-disagree-01",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        201,
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.0,
+      "mrr": 0.16666666666666666,
+      "ndcg": 0.40298313359773236,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.034400029107928276
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-disagree-02",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        601
+      ],
+      "recall": 1.0,
+      "precision": 0.0,
+      "mrr": 0.125,
+      "ndcg": 0.31546487678572877,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03659992944449186
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-meta-01",
+      "category": "metadata",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.03590004052966833
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-unanswerable-01",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 0.0,
+      "latency_ms": 0.03660004585981369
+    },
+    {
+      "mode": "vector",
+      "query_id": "q-unanswerable-02",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 0.0,
+      "latency_ms": 0.035499921068549156
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q1",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        103,
+        101,
+        501,
+        401,
+        102,
+        302,
+        201,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        101,
+        103
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.08840009104460478
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q2",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        101,
+        201,
+        102,
+        202,
+        301,
+        103,
+        302,
+        501,
+        601
+      ],
+      "relevant_chunk_ids": [
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.2,
+      "ndcg": 0.38685280723454163,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.08409994188696146
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q3",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        302,
+        301,
+        401,
+        103,
+        101,
+        102,
+        201,
+        501,
+        601,
+        202
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.0708999577909708
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-exact-01",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        401,
+        103,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 1.0,
+      "ndcg": 0.8772153153380493,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.0643999082967639
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-exact-02",
+      "category": "exact",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 1.0,
+      "ndcg": 1.0,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.06049999501556158
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-paraphrase-01",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        101,
+        103,
+        102,
+        201,
+        302,
+        202,
+        501,
+        301,
+        601
+      ],
+      "relevant_chunk_ids": [
+        101,
+        102
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.5,
+      "ndcg": 0.6509209298071326,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.08999998681247234
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-paraphrase-02",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        401,
+        302,
+        103,
+        102,
+        301,
+        202,
+        201,
+        501,
+        601
+      ],
+      "relevant_chunk_ids": [
+        301,
+        302
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5249810332008933,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.09049999061971903
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-paraphrase-03",
+      "category": "paraphrase",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        103,
+        102,
+        401,
+        501,
+        201,
+        302,
+        301,
+        601,
+        202
+      ],
+      "relevant_chunk_ids": [
+        501
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.2,
+      "ndcg": 0.38685280723454163,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.0822999281808734
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-disagree-01",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        401,
+        101,
+        201,
+        202,
+        103,
+        102,
+        302,
+        501,
+        601,
+        301
+      ],
+      "relevant_chunk_ids": [
+        201,
+        202
+      ],
+      "recall": 1.0,
+      "precision": 0.4,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5706417189553201,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.08559995330870152
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-disagree-02",
+      "category": "disagreement",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        103,
+        601,
+        501,
+        401,
+        102,
+        302,
+        201,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [
+        601
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.07199996616691351
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-meta-01",
+      "category": "metadata",
+      "is_answerable": true,
+      "ranked_chunk_ids": [
+        101,
+        401,
+        102,
+        202,
+        301,
+        601,
+        103,
+        302,
+        201,
+        501
+      ],
+      "relevant_chunk_ids": [
+        401
+      ],
+      "recall": 1.0,
+      "precision": 0.2,
+      "mrr": 0.5,
+      "ndcg": 0.6309297535714575,
+      "no_result_accuracy": 1.0,
+      "latency_ms": 0.06830005440860987
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-unanswerable-01",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 0.0,
+      "latency_ms": 0.06350001785904169
+    },
+    {
+      "mode": "hybrid",
+      "query_id": "q-unanswerable-02",
+      "category": "unanswerable",
+      "is_answerable": false,
+      "ranked_chunk_ids": [
+        401,
+        103,
+        101,
+        102,
+        302,
+        201,
+        501,
+        601,
+        202,
+        301
+      ],
+      "relevant_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0,
+      "no_result_accuracy": 0.0,
+      "latency_ms": 0.06900005973875523
+    }
+  ]
+}

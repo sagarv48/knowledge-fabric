@@ -10,9 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sagarv48/knowledge-fabric/actions"><img src="https://img.shields.io/badge/CI-passing-brightgreen.svg" alt="CI Status"></a>
+  <a href="https://github.com/sagarv48/knowledge-fabric/actions"><img src="https://github.com/sagarv48/knowledge-fabric/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
   <a href="https://github.com/sagarv48/knowledge-fabric/releases"><img src="https://img.shields.io/badge/Release-v0.1.1-blue.svg" alt="Release"></a>
-  <a href="https://ghcr.io/sagarv48/charts/knowledge-fabric"><img src="https://img.shields.io/badge/Helm%20OCI-v0.1.1-0F1689?logo=helm&logoColor=white" alt="Helm Chart"></a>
   <a href="https://codespaces.new/sagarv48/knowledge-fabric"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Native%20Server-purple.svg" alt="MCP Native"></a>
@@ -82,10 +81,10 @@ How actual CTOs deploy Knowledge Fabric across enterprise verticals:
 
 | Vertical | Primary Compliance & Architectural Concern | Knowledge Fabric Solution | Impact & ROI |
 | :--- | :--- | :--- | :--- |
-| **Fintech & Banking** | Strict SEC/FINRA audit trails, zero public cloud data leakage, exact compliance code matching. | Hybrid RRF (BM25 + pgvector) on private AWS RDS Aurora; local offline embeddings with Ollama. | **$120k/yr saved** on vector DB SaaS; 100% compliance audit trail. |
+| **Fintech & Banking** | Strict SEC/FINRA audit trails, zero public cloud data leakage, exact compliance code matching. | Hybrid RRF (BM25 + pgvector) on private AWS RDS Aurora; local offline embeddings with Ollama. | Eliminates dedicated vector DB SaaS spend; 100% compliance audit trail via built-in `AuditLogger`. |
 | **Healthcare & Pharma** | HIPAA compliance, patient PII containment, medical terminology precision. | Dual-mode PostgreSQL Row-Level Security (RLS) guarantees data is physically unqueryable across departments. | **Zero cross-tenant leakage risk**; passes strict clinical HIPAA review. |
-| **Enterprise B2B SaaS** | Multi-tenancy at scale (50M+ chunks), sub-10ms query latency, fast self-hosting. | HNSW indexing with declarative PostgreSQL tenant table partitioning. | **Sub-10ms retrieval** across millions of documents with partition pruning. |
-| **DevOps & Cloud SRE** | Automated incident triage, runbook citation, turnkey Kubernetes deployment. | Multi-arch Docker containers, official Helm chart with external DB secret injection, and FastMCP server. | **60-second rollout** on EKS/GKE; grounded runbook retrieval for on-call agents. |
+| **Enterprise B2B SaaS** | Multi-tenancy at scale (50M+ chunks), sub-10ms query latency, fast self-hosting. | HNSW indexing with declarative PostgreSQL tenant table partitioning. | HNSW enables low-latency retrieval across millions of documents with partition pruning. |
+| **DevOps & Cloud SRE** | Automated incident triage, runbook citation, turnkey Kubernetes deployment. | Multi-arch Docker containers, Docker Compose stack, and FastMCP server. | Rapid local deployment; grounded runbook retrieval for on-call agents. |
 
 ## Architecture
 
@@ -149,23 +148,11 @@ docker compose up -d
 # Access Visual Admin Console at: http://localhost:8080
 ```
 
-### ☸️ Pathway 3: Enterprise Kubernetes (Production Helm Chart)
-Deploy a resilient, scalable, multi-tenant cluster deployment on EKS, GKE, AKS, or OpenShift:
-```bash
-# Install via OCI registry
-helm install fabric-stack oci://ghcr.io/sagarv48/charts/knowledge-fabric \
-  --namespace fabric --create-namespace \
-  --set postgresql.enabled=true \
-  --set security.approvalEnforcement=enforce
+### ☸️ Pathway 3: Kubernetes Deployment *(Planned)*
+Helm chart packaging is planned. For now, deploy the Docker image directly to your cluster using standard Kubernetes `Deployment` + `Service` manifests, pointing to your external RDS / Cloud SQL instance.
 
-# Or connect to external AWS RDS / GCP Cloud SQL:
-# helm install fabric-stack oci://ghcr.io/sagarv48/charts/knowledge-fabric \
-#   --namespace fabric --create-namespace \
-#   --set postgresql.enabled=false \
-#   --set postgresql.external.enabled=true \
-#   --set postgresql.external.host=my-rds.amazonaws.com \
-#   --set postgresql.external.existingSecret=my-rds-secret
-```
+> [!NOTE]
+> The `helm install oci://ghcr.io/sagarv48/charts/knowledge-fabric` command shown in earlier versions targets a Helm OCI registry that has not yet been published. Watch the [releases page](https://github.com/sagarv48/knowledge-fabric/releases) for the first official Helm chart release.
 
 ### 🛠️ Pathway 4: Local Contributor Setup
 ```bash
@@ -235,11 +222,12 @@ Knowledge Fabric exposes standard MCP tools for LLMs, desktop assistants, and wo
 
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
-| `retrieve_evidence` | `query_text` (str), `tenant_id` (str), `top_k` (int), `mode` (str) | Executes hybrid retrieval and returns structured evidence package with citations and relevance scores. |
-| `get_document` | `document_uri` (str) | Retrieves the full raw content and metadata for a specific document URI. |
-| `explain_retrieval` | `query_text` (str), `top_k` (int) | Returns detailed diagnostics: lexical ranks, vector distances, and RRF fusion scores. |
+| `retrieve_evidence` | `query_text` (str), `tenant_id` (str\|null), `top_k` (int), `source_type` (str\|null), `trace_id` (str\|null), `mode` (str: `hybrid`\|`lexical`\|`vector`) | Executes retrieval (hybrid RRF, lexical full-text, or semantic vector) and returns structured evidence package with citations, per-leg health, and relevance scores. |
+| `get_document` | `document_id` (int\|null), `source_uri` (str\|null), `tenant_id` (str\|null) | Retrieves the full content and metadata for a specific document, scoped to tenant. |
+| `explain_retrieval` | `query_text` (str), `top_k` (int), `source_type` (str\|null), `tenant_id` (str\|null), `mode` (str) | Returns detailed diagnostics: lexical ranks, vector distances, per-leg latencies, and RRF fusion scores. |
 | `health_check` | *None* | Verifies database connectivity, row counts, embedding provider status, and dimension alignment. |
-| `list_sources` | *None* | Lists all ingested document source types and document counts. |
+| `list_sources` | `tenant_id` (str\|null) | Lists ingested document source types and document counts, scoped to the calling tenant. |
+
 
 ### Adding to Claude Desktop / Cursor
 Add to your `claude_desktop_config.json`:
@@ -270,7 +258,9 @@ Run the included benchmark evaluation suite to compare retrieval accuracy across
 python benchmarks/evaluate_retrieval.py
 ```
 
-Sample benchmark output on enterprise operational corpus:
+> [!NOTE]
+> The numbers below are **illustrative** — generated by running `python benchmarks/evaluate_retrieval.py` on a small synthetic operational corpus. Run the command yourself on your own corpus to produce numbers that reflect your data and query distribution. Results will differ by domain, chunk size, and embedding model.
+
 ```text
 Retrieval Strategy         | NDCG@10    | MRR@10     | Recall@10  | vs Vector
 ----------------------------------------------------------------------------

@@ -52,14 +52,15 @@ retrieval:
 reranking:
   # ── Choose your reranker ──────────────────────────────────────────────────
   # Option A (local, free, recommended):
-  #   Set env: RERANKER=cross_encoder
-  #   Requires: pip install sentence-transformers (~500MB model downloaded on first use)
-  #   Model: cross-encoder/ms-marco-MiniLM-L-6-v2 (override with CROSS_ENCODER_MODEL)
+  #   provider: cross_encoder
+  #   Requires: pip install knowledge-fabric[reranking] (~500MB model downloaded on first use)
+  #   Model: cross-encoder/ms-marco-MiniLM-L-6-v2 (override with CROSS_ENCODER_MODEL env)
   #
   # Option B (API, best quality, free tier):
-  #   Set env: RERANKER=cohere COHERE_API_KEY=...
-  #   Model: rerank-english-v3.0 (override with COHERE_RERANK_MODEL)
+  #   provider: cohere
+  #   Requires: COHERE_API_KEY env var
+  #   Model: rerank-english-v3.0 (override with COHERE_RERANK_MODEL env)
   #
-  # Option C (no reranking, RRF results only):
-  #   Set env: RERANKER=none  (or leave unset)
+  # Option C (no reranking, RRF results only — default):
+  provider: none
   top_n: 5   # number of chunks returned after reranking

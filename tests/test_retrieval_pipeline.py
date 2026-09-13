@@ -86,3 +86,116 @@ def test_pipeline_explain_retrieval() -> None:
     assert details["top_k"] == 3
     assert details["trace"]["lexical_count"] == 1
     assert set(details["sources"]) == {"lexical", "vector"}
+    assert details["legs"]["lexical"]["status"] == "ok"
+    assert details["legs"]["vector"]["status"] == "ok"
+
+
+def test_pipeline_lexical_only_mode_bypasses_embeddings() -> None:
+    class _StrictNoEmbeddingProvider:
+        dimension = 8
+
+        def embed_texts(self, texts: list[str]) -> list[list[float]]:
+            raise AssertionError("embed_texts must not be called in lexical-only mode")
+
+    pipeline = RetrievalPipeline(
+        retrieval_store=_FakeStore(),  # type: ignore[arg-type]
+        embedding_provider=_StrictNoEmbeddingProvider(),  # type: ignore[arg-type]
+    )
+
+    package, trace = pipeline.retrieve_with_trace(query_text="exact match", mode="lexical")
+
+    assert package.retrieval_summary["requested_mode"] == "lexical"
+    assert package.retrieval_summary["strategy"] == "lexical"
+    assert package.retrieval_summary["is_degraded"] is False
+    assert package.retrieval_summary["legs"]["vector"]["status"] == "skipped"
+    assert package.retrieval_summary["legs"]["lexical"]["status"] == "ok"
+    assert trace.vector_status == "skipped"
+    assert trace.lexical_status == "ok"
+    assert len(package.items) == 1
+    assert package.items[0].snippet == "lexical result"
+
+
+def test_pipeline_vector_only_mode_bypasses_lexical() -> None:
+    class _StrictNoLexicalStore:
+        def lexical_search(self, *args, **kwargs):
+            raise AssertionError("lexical_search must not be called in vector-only mode")
+
+        def vector_search(self, *args, **kwargs):
+            return _FakeStore().vector_search(*args, **kwargs)
+
+    pipeline = RetrievalPipeline(
+        retrieval_store=_StrictNoLexicalStore(),  # type: ignore[arg-type]
+        embedding_provider=MockEmbeddingProvider(_dimension=8),
+    )
+
+    package, trace = pipeline.retrieve_with_trace(query_text="semantic meaning", mode="vector")
+
+    assert package.retrieval_summary["requested_mode"] == "vector"
+    assert package.retrieval_summary["strategy"] == "vector"
+    assert package.retrieval_summary["is_degraded"] is False
+    assert package.retrieval_summary["legs"]["lexical"]["status"] == "skipped"
+    assert package.retrieval_summary["legs"]["vector"]["status"] == "ok"
+    assert trace.lexical_status == "skipped"
+    assert trace.vector_status == "ok"
+    assert len(package.items) == 1
+    assert package.items[0].snippet == "vector result"
+
+
+def test_pipeline_hybrid_degraded_when_vector_leg_fails() -> None:
+    class _FailingVectorStore:
+        def lexical_search(self, *args, **kwargs):
+            return _FakeStore().lexical_search(*args, **kwargs)
+
+        def vector_search(self, *args, **kwargs):
+            raise RuntimeError("pgvector connection dropped")
+
+    pipeline = RetrievalPipeline(
+        retrieval_store=_FailingVectorStore(),  # type: ignore[arg-type]
+        embedding_provider=MockEmbeddingProvider(_dimension=8),
+    )
+
+    package, trace = pipeline.retrieve_with_trace(
+        query_text="robust query", mode="hybrid", fail_closed=False
+    )
+
+    assert package.retrieval_summary["requested_mode"] == "hybrid"
+    assert package.retrieval_summary["strategy"] == "degraded_lexical"
+    assert package.retrieval_summary["is_degraded"] is True
+    assert package.retrieval_summary["legs"]["vector"]["status"] == "error"
+    assert package.retrieval_summary["legs"]["lexical"]["status"] == "ok"
+    assert any("vector_leg_failed" in w for w in package.retrieval_summary["warnings"])
+    assert trace.is_degraded is True
+    assert len(package.items) == 1
+    assert package.items[0].snippet == "lexical result"
+
+
+def test_pipeline_hybrid_fails_closed_when_flagged() -> None:
+    import pytest
+
+    class _FailingVectorStore:
+        def lexical_search(self, *args, **kwargs):
+            return _FakeStore().lexical_search(*args, **kwargs)
+
+        def vector_search(self, *args, **kwargs):
+            raise RuntimeError("Fatal vector backend failure")
+
+    pipeline = RetrievalPipeline(
+        retrieval_store=_FailingVectorStore(),  # type: ignore[arg-type]
+        embedding_provider=MockEmbeddingProvider(_dimension=8),
+    )
+
+    with pytest.raises(RuntimeError, match="Fatal vector backend failure"):
+        pipeline.retrieve_with_trace(query_text="strict query", mode="hybrid", fail_closed=True)
+
+
+def test_pipeline_rejects_invalid_mode() -> None:
+    import pytest
+
+    pipeline = RetrievalPipeline(
+        retrieval_store=_FakeStore(),  # type: ignore[arg-type]
+        embedding_provider=MockEmbeddingProvider(_dimension=8),
+    )
+
+    with pytest.raises(ValueError, match="Invalid retrieval mode"):
+        pipeline.retrieve_with_trace(query_text="query", mode="unsupported_quantum")
+

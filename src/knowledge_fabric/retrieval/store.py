@@ -31,6 +31,53 @@ class RetrievalStore(Protocol):
     ) -> list[RetrievalHit]:
         """Execute dense vector similarity search filtered by tenant."""
 
+    def get_document(
+        self,
+        *,
+        document_id: int | None = None,
+        source_uri: str | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Fetch one document by id or source URI scoped to tenant_id."""
+
+    def delete_document(
+        self,
+        *,
+        document_id: int | None = None,
+        source_uri: str | None = None,
+        tenant_id: str | None = None,
+    ) -> bool:
+        """Delete one document scoped to tenant_id, cascading to its chunks."""
+
+    def purge_tenant(
+        self,
+        tenant_id: str,
+    ) -> dict[str, Any]:
+        """Purge all documents, chunks, and operational data for a tenant."""
+
+    def get_chunk(
+        self,
+        *,
+        chunk_id: int,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Fetch one chunk by id scoped to tenant_id."""
+
+    def get_index_status(
+        self,
+        *,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Query index health, document counts, and source distribution."""
+
+    def check_consistency(
+        self,
+        *,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Validate database relational invariants and detect orphaned records."""
+
+
 
 def build_retrieval_store(
     backend: str = "",
