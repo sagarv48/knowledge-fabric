@@ -223,8 +223,11 @@ Knowledge Fabric exposes standard MCP tools for LLMs, desktop assistants, and wo
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
 | `retrieve_evidence` | `query_text` (str), `tenant_id` (str\|null), `top_k` (int), `source_type` (str\|null), `trace_id` (str\|null), `mode` (str: `hybrid`\|`lexical`\|`vector`) | Executes retrieval (hybrid RRF, lexical full-text, or semantic vector) and returns structured evidence package with citations, per-leg health, and relevance scores. |
+| `get_evidence` | `chunk_id` (int), `tenant_id` (str\|null) | Retrieves a specific cited chunk by its database ID with complete provenance and metadata. |
 | `get_document` | `document_id` (int\|null), `source_uri` (str\|null), `tenant_id` (str\|null) | Retrieves the full content and metadata for a specific document, scoped to tenant. |
 | `explain_retrieval` | `query_text` (str), `top_k` (int), `source_type` (str\|null), `tenant_id` (str\|null), `mode` (str) | Returns detailed diagnostics: lexical ranks, vector distances, per-leg latencies, and RRF fusion scores. |
+| `get_index_status` | `tenant_id` (str\|null) | Returns index health diagnostics: total documents, total chunks, and document counts per source type. |
+| `check_consistency` | `tenant_id` (str\|null) | Audits relational database invariants (orphaned chunks, empty docs, null tenants, missing embeddings). |
 | `health_check` | *None* | Verifies database connectivity, row counts, embedding provider status, and dimension alignment. |
 | `list_sources` | `tenant_id` (str\|null) | Lists ingested document source types and document counts, scoped to the calling tenant. |
 
