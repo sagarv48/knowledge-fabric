@@ -1,62 +1,50 @@
+version: "3.8"
+
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: knowledge-fabric-postgres
+    container_name: kf-postgres
+    restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-knowledge_fabric}
-      POSTGRES_USER: ${POSTGRES_USER:-knowledge_fabric}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
-      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_USER: kf_user
+      POSTGRES_PASSWORD: kf_password
+      POSTGRES_DB: knowledge_fabric
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/schema:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U knowledge_fabric -d knowledge_fabric"]
+      test: ["CMD-SHELL", "pg_isready -U kf_user -d knowledge_fabric"]
       interval: 5s
       timeout: 5s
-      retries: 10
-
-  tika:
-    image: apache/tika:2.9.2.1
-    container_name: knowledge-fabric-tika
-    ports:
-      - "9998:9998"
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: knowledge-fabric-ollama
-    profiles: ["local-ai", "all"]
-    ports:
-      - "11434:11434"
+      retries: 5
     volumes:
-      - ollama_data:/root/.ollama
-  app:
+      - kf_pgdata:/var/lib/postgresql/data
+      - ./db/schema:/docker-entrypoint-initdb.d:ro
+
+  knowledge-mcp:
     build:
       context: .
       dockerfile: Dockerfile
-    image: knowledge-fabric:latest
-    container_name: knowledge-fabric-app
+    container_name: kf-mcp-server
+    restart: unless-stopped
+    entrypoint: []
+    command: fastmcp run src/knowledge_fabric/mcp/server.py --transport sse --host 0.0.0.0 --port 8000
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
-      KF_DB_HOST: postgres
-      KF_DB_PORT: "5432"
-      KF_DB_NAME: ${POSTGRES_DB:-knowledge_fabric}
-      KF_DB_USER: ${POSTGRES_USER:-knowledge_fabric}
-      KF_DB_PASSWORD: ${POSTGRES_PASSWORD:-}
-      TIKA_ENDPOINT: "http://tika:9998"
-      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
-      FABRIC_SIGNING_KEY: ${FABRIC_SIGNING_KEY:-dev-secret-signing-key-32bytes-min}
-      FABRIC_APPROVAL_ENFORCEMENT: ${FABRIC_APPROVAL_ENFORCEMENT:-enforce}
+      DATABASE_URL: postgresql://kf_user:kf_password@postgres:5432/knowledge_fabric
     depends_on:
       postgres:
         condition: service_healthy
-      tika:
-        condition: service_started
-    restart: unless-stopped
+
+  smoke-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kf-smoke-test
+    entrypoint: []
+    command: python scripts/verify_mcp_health.py --url http://knowledge-mcp:8000/sse --timeout 30
+    depends_on:
+      - knowledge-mcp
 
 volumes:
-  postgres_data:
-  ollama_data:
+  kf_pgdata:

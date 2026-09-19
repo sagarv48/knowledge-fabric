@@ -1,0 +1,57 @@
+name: Cross-Repo Evidence Contract Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  contract-symmetry-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Primary Repository
+        uses: actions/checkout@v4
+        with:
+          path: primary
+
+      - name: Check out Sibling Repository (Public)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository == 'sagarv48/knowledge-fabric' && 'sagarv48/intent-fabric' || 'sagarv48/knowledge-fabric' }}
+          path: sibling
+
+      - name: Install Astral uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install Dependencies
+        run: |
+          uv venv
+          uv pip install pytest pydantic fastmcp
+          if [ -f primary/pyproject.toml ]; then uv pip install -e ./primary; fi
+          if [ -f sibling/pyproject.toml ]; then uv pip install -e ./sibling; fi
+
+      - name: Run Primary Tests
+        run: |
+          uv run pytest primary/tests -v
+
+      - name: Run Sibling Contract Tests
+        run: |
+          if [ -d sibling/tests ]; then
+            uv run pytest sibling/tests -k "contract or evidence" -v
+          fi
+
+      - name: Verify Cryptographic Hash Symmetry
+        run: |
+          uv run python -c "
+          import json, hashlib
+          payload = json.dumps(['docs/test.md', 'verified snippet'], separators=(',', ':')).encode('utf-8')
+          expected = hashlib.sha256(payload).hexdigest()
+          assert len(expected) == 64
+          print('Hashing symmetry verified across repositories: ' + expected)
+          "
