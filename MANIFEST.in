@@ -1,0 +1,9 @@
+# Include source and config for sdist
+recursive-include src *.py *.yaml *.sql *.html *.css *.js *.svg
+include pyproject.toml README.md LICENSE CHANGELOG.md
+
+# Exclude non-distributable directories
+prune examples
+prune benchmarks
+prune tests
+prune .github

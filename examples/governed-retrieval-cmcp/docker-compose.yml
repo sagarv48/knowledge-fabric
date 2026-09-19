@@ -1,0 +1,51 @@
+# Governed Retrieval Stack: PostgreSQL + Knowledge Fabric + cMCP Gateway
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: knowledge_fabric
+      POSTGRES_USER: knowledge_fabric
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    ports:
+      - "5433:5432"             # Offset port to avoid conflict with root docker-compose
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../../db/schema:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U knowledge_fabric"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  knowledge-fabric:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      KF_DB_HOST: postgres
+      KF_DB_PORT: "5432"
+      KF_DB_NAME: knowledge_fabric
+      KF_DB_USER: knowledge_fabric
+      EMBEDDING_PROVIDER: mock
+      TIKA_ENDPOINT: ""
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8080"             # Direct access to Knowledge Fabric (bypass gateway)
+
+  cmcp-gateway:
+    image: ghcr.io/agentrust-io/cmcp-runtime:latest
+    environment:
+      CMCP_DEV_MODE: "1"
+      CMCP_UPSTREAM_URL: "http://knowledge-fabric:8080"
+      CMCP_POLICY_PATH: "/policies/retrieval-policy.cedar"
+    volumes:
+      - ./policies:/policies:ro
+    depends_on:
+      - knowledge-fabric
+    ports:
+      - "8082:8080"             # Governed zero-trust gateway entrypoint
+
+volumes:
+  pgdata:
