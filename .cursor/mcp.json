@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "knowledge-fabric": {
+      "command": "C:\\Users\\vinay\\.local\\bin\\uv.exe",
+      "args": [
+        "--directory",
+        "C:\\Users\\vinay\\dev\\code\\knowledge-fabric",
+        "run",
+        "knowledge-fabric-mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "src",
+        "EMBEDDING_PROVIDER": "mock",
+        "KNOWLEDGE_STRICT_TENANT_CHECK": "false"
+      }
+    }
+  }
+}

@@ -256,7 +256,13 @@ class RetrievalPipeline:
                 },
             },
         }
-        package = build_evidence_package(safe_query, reranked, summary_extra=summary_extra)
+        package = build_evidence_package(
+            safe_query,
+            reranked,
+            summary_extra=summary_extra,
+            tenant_id=safe_tenant,
+            mode=normalized_mode,
+        )
 
         trace = RetrievalTrace(
             query_text=safe_query,

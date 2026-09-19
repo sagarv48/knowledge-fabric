@@ -1,5 +1,17 @@
-"""Evidence package contract."""
+from knowledge_fabric.evidence.models import (
+    EvidenceItem,
+    EvidencePackage,
+    build_evidence_package,
+    compute_chunk_hash,
+    compute_package_digest,
+    compute_query_fingerprint,
+)
 
-from knowledge_fabric.evidence.models import EvidenceItem, EvidencePackage, build_evidence_package
-
-__all__ = ["EvidenceItem", "EvidencePackage", "build_evidence_package"]
+__all__ = [
+    "EvidenceItem",
+    "EvidencePackage",
+    "build_evidence_package",
+    "compute_chunk_hash",
+    "compute_package_digest",
+    "compute_query_fingerprint",
+]

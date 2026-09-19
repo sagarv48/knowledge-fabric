@@ -189,3 +189,8 @@ def run_mcp_server(settings_path: str = "config/settings.yaml") -> None:
     tools = build_tools_from_settings(settings)
     server = create_mcp_server(tools)
     server.run()
+
+
+if __name__ == "__main__":
+    run_mcp_server()
+
