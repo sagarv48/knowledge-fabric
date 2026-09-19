@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 
@@ -10,12 +12,17 @@ from knowledge_fabric.fusion.rrf import HybridHit
 
 
 def compute_chunk_hash(document_uri: str, snippet: str) -> str:
-    """Compute deterministic SHA-256 provenance hash for a single evidence chunk.
+    """Compute deterministic SHA-256 provenance hash using RFC 8785 canonical JSON serialization.
 
-    Formula: SHA-256(document_uri + ":" + snippet)
+    Formula: SHA-256(json.dumps([document_uri, snippet], separators=(',', ':'), ensure_ascii=False))
     """
-    payload = f"{document_uri}:{snippet}".encode("utf-8")
-    return hashlib.sha256(payload).hexdigest()
+    canonical_payload = json.dumps(
+        [document_uri, snippet],
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical_payload).hexdigest()
+
 
 
 def compute_package_digest(items: list[EvidenceItem]) -> str:
@@ -77,12 +84,27 @@ class EvidencePackage:
     retrieval_summary: dict[str, object] = field(default_factory=dict)
     provenance_digest: str = ""
     query_fingerprint: str = ""
+    retrieval_id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    tenant_id: str = "default"
 
     def to_dict(self) -> dict[str, object]:
         return {
+            "retrieval_id": self.retrieval_id,
+            "tenant_id": self.tenant_id,
+            "timestamp_utc": self.generated_at.isoformat(),
             "query_text": self.query_text,
             "generated_at": self.generated_at.isoformat(),
             "items": [asdict(item) for item in self.items],
+            "chunks": [
+                {
+                    "chunk_id": str(item.chunk_id),
+                    "content": item.snippet,
+                    "source_uri": item.document_uri,
+                    "provenance_hash": item.provenance_hash,
+                    "score": item.score,
+                }
+                for item in self.items
+            ],
             "retrieval_summary": self.retrieval_summary,
             "provenance_digest": self.provenance_digest,
             "query_fingerprint": self.query_fingerprint,
@@ -107,6 +129,7 @@ def build_evidence_package(
     summary_extra: dict[str, object] | None = None,
     tenant_id: str | None = None,
     mode: str = "hybrid",
+    retrieval_id: str | None = None,
 ) -> EvidencePackage:
     items = [
         EvidenceItem(
@@ -137,5 +160,8 @@ def build_evidence_package(
         retrieval_summary=summary,
         provenance_digest=compute_package_digest(items),
         query_fingerprint=compute_query_fingerprint(query_text, tenant_id=tenant_id, mode=mode),
+        retrieval_id=retrieval_id or uuid.uuid4().hex,
+        tenant_id=tenant_id or "default",
     )
+
 

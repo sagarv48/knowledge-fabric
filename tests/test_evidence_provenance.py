@@ -5,6 +5,7 @@ and backward compatibility with existing tests.
 """
 
 import hashlib
+import json
 
 from knowledge_fabric.evidence.models import (
     EvidenceItem,
@@ -43,9 +44,11 @@ def test_compute_chunk_hash_changes_with_content():
 
 
 def test_compute_chunk_hash_matches_manual_sha256():
-    """Hash matches manually computed SHA-256 of 'uri:snippet'."""
+    """Hash matches manually computed SHA-256 of canonical JSON [uri, snippet]."""
     uri, snippet = "docs/policy.md", "MFA required"
-    expected = hashlib.sha256(f"{uri}:{snippet}".encode("utf-8")).hexdigest()
+    expected = hashlib.sha256(
+        json.dumps([uri, snippet], separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
     assert compute_chunk_hash(uri, snippet) == expected
 
 
@@ -130,6 +133,28 @@ def test_build_evidence_package_backward_compatible():
     assert package.query_text == "query"
     assert len(package.items) == 1
     assert package.items[0].provenance_hash != ""
+
+
+def test_evidence_package_to_dict_emits_task1_canonical_schema():
+    """EvidencePackage.to_dict() emits Task 1 canonical keys and chunk schema."""
+    hits = [_make_hybrid_hit(1, "doc.md", "evidence text")]
+    package = build_evidence_package("query", hits, tenant_id="tenant-123")
+    d = package.to_dict()
+
+    # Task 1 top-level keys
+    assert "retrieval_id" in d and len(d["retrieval_id"]) > 0
+    assert d["tenant_id"] == "tenant-123"
+    assert "timestamp_utc" in d
+    assert "provenance_digest" in d
+    assert "chunks" in d
+
+    # Task 1 chunk keys
+    chunk = d["chunks"][0]
+    assert chunk["chunk_id"] == "1"
+    assert chunk["source_uri"] == "doc.md"
+    assert chunk["content"] == "evidence text"
+    assert chunk["provenance_hash"] == compute_chunk_hash("doc.md", "evidence text")
+    assert chunk["score"] == 0.5
 
 
 # ── Helper ──────────────────────────────────────────────────────────
